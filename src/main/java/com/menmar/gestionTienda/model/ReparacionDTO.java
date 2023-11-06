@@ -13,7 +13,7 @@ public class ReparacionDTO {
 
     private String codReparacion;
     private String detalleReparacion;
-    private ReparacionDTO tipoReparacion;
+    private TipoReparacionDTO tipoReparacion;
     private LocalDate fechaEntrada;
     private LocalDate fechaArreglo;
     private LocalDate fechaRecogida;

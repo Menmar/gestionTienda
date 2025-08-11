@@ -1,36 +1,43 @@
 package com.menmar.gestionTienda.persistence.entity;
 
+import com.menmar.gestionTienda.persistence.entity.id.TokenId;
 import jakarta.persistence.Column;
+import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
+import java.time.LocalDate;
 import java.util.Objects;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import lombok.ToString.Exclude;
 import org.hibernate.proxy.HibernateProxy;
 
 @Entity
-@Table(name = "foto")
+@Table(name = "token")
 @Getter
 @Setter
 @ToString
 @RequiredArgsConstructor
 @AllArgsConstructor
-public class Foto {
+public class Token {
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @Exclude
-  private Reparacion reparacion;
+  @EmbeddedId
+  private TokenId id;
 
-  @Column(name = "rutaFoto")
-  @Id
-  private String rutaFoto;
+  @NotNull
+  @Column(name = "refreshToken", nullable = false, length = Integer.MAX_VALUE)
+  private String refreshToken;
+
+  @NotNull
+  @Column(name = "accessTokenExpirationTime", nullable = false)
+  private LocalDate accessTokenExpirationTime;
+
+  @NotNull
+  @Column(name = "refreshTokenExpirationTime", nullable = false)
+  private LocalDate refreshTokenExpirationTime;
 
   @Override
   public final boolean equals(Object o) {
@@ -48,14 +55,12 @@ public class Foto {
     if (thisEffectiveClass != oEffectiveClass) {
       return false;
     }
-    Foto foto = (Foto) o;
-    return getRutaFoto() != null && Objects.equals(getRutaFoto(), foto.getRutaFoto());
+    Token token = (Token) o;
+    return getId() != null && Objects.equals(getId(), token.getId());
   }
 
   @Override
   public final int hashCode() {
-    return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer()
-        .getPersistentClass()
-        .hashCode() : getClass().hashCode();
+    return Objects.hash(id);
   }
 }

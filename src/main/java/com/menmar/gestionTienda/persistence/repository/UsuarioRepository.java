@@ -4,4 +4,6 @@ import com.menmar.gestionTienda.persistence.entity.Usuario;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface UsuarioRepository extends JpaRepository<Usuario, String> {
+
+  Usuario findUsuarioByIdUsuario(String idUsuario);
 }

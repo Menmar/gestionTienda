@@ -1,16 +1,17 @@
 package com.menmar.gestionTienda.controller;
 
+import com.menmar.gestionTienda.model.PageResponse;
 import com.menmar.gestionTienda.model.usuario.UsuarioRequest;
 import com.menmar.gestionTienda.model.usuario.UsuarioResponse;
 import com.menmar.gestionTienda.service.UsuarioService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/usuarios")
@@ -26,8 +27,11 @@ public class UsuarioController {
     }
 
     @GetMapping
-    public ResponseEntity<List<UsuarioResponse>> listar() {
-        return ResponseEntity.ok(usuarioService.listar());
+    public ResponseEntity<PageResponse<UsuarioResponse>> listar(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        var pageable = PageRequest.of(page, size, Sort.by("apellidos").ascending());
+        return ResponseEntity.ok(usuarioService.listar(pageable));
     }
 
     @GetMapping("/{id}")
@@ -37,7 +41,7 @@ public class UsuarioController {
 
     @PutMapping("/{id}")
     public ResponseEntity<UsuarioResponse> actualizar(@PathVariable Long id,
-                                                       @Valid @RequestBody UsuarioRequest request) {
+                                                      @Valid @RequestBody UsuarioRequest request) {
         return ResponseEntity.ok(usuarioService.actualizar(id, request));
     }
 

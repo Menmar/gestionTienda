@@ -1,9 +1,10 @@
 package com.menmar.gestionTienda.security;
 
+import com.menmar.gestionTienda.config.AppProperties;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -15,35 +16,30 @@ import java.util.Map;
 import java.util.function.Function;
 
 @Service
+@RequiredArgsConstructor
 public class JwtService {
 
-    @Value("${app.jwt.secret}")
-    private String secret;
-
-    @Value("${app.jwt.expiration-ms}")
-    private long expirationMs;
-
-    @Value("${app.jwt.refresh-expiration-ms}")
-    private long refreshExpirationMs;
+    private final AppProperties appProperties;
 
     private SecretKey key() {
-        return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+        return Keys.hmacShaKeyFor(appProperties.jwt().secret().getBytes(StandardCharsets.UTF_8));
     }
 
     public String generarToken(UserDetails user) {
-        return buildToken(Map.of(), user, expirationMs);
+        return buildToken(Map.of(), user, appProperties.jwt().expirationMs());
     }
 
     public String generarRefreshToken(UserDetails user) {
-        return buildToken(Map.of(), user, refreshExpirationMs);
+        return buildToken(Map.of(), user, appProperties.jwt().refreshExpirationMs());
     }
 
     private String buildToken(Map<String, Object> extraClaims, UserDetails user, long expMs) {
+        var now = Instant.now();
         return Jwts.builder()
                 .claims(extraClaims)
                 .subject(user.getUsername())
-                .issuedAt(Date.from(Instant.now()))
-                .expiration(Date.from(Instant.now().plusMillis(expMs)))
+                .issuedAt(Date.from(now))
+                .expiration(Date.from(now.plusMillis(expMs)))
                 .signWith(key())
                 .compact();
     }

@@ -132,6 +132,13 @@
       <version>${springdoc.version}</version>
     </dependency>
 
+    <!-- PDF generation -->
+    <dependency>
+      <groupId>com.github.librepdf</groupId>
+      <artifactId>openpdf</artifactId>
+      <version>${openpdf.version}</version>
+    </dependency>
+
     <!-- Test -->
     <dependency>
       <artifactId>spring-boot-starter-test</artifactId>
@@ -196,6 +203,14 @@
       </properties>
     </profile>
 
+    <profile>
+      <id>sonar</id>
+      <properties>
+        <sonar.host.url>http://localhost:9000</sonar.host.url>
+        <sonar.token>sqp_6fe318620c8048dabba1cbc319e5d1b2b7e3a0d0</sonar.token>
+      </properties>
+    </profile>
+
   </profiles>
 
   <!-- ================================================================
@@ -208,6 +223,7 @@
     <mapstruct.version>1.6.3</mapstruct.version> <!-- ← cambiado -->
     <spring.profiles.active>local</spring.profiles.active>
     <springdoc.version>3.0.3</springdoc.version>
+    <openpdf.version>1.3.43</openpdf.version>
   </properties>
 
   <!-- ================================================================

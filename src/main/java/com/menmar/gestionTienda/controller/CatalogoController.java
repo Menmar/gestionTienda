@@ -25,6 +25,11 @@ public class CatalogoController {
         return ResponseEntity.ok(catalogoService.listarFamilias());
     }
 
+    @GetMapping("/familias/{id}")
+    public ResponseEntity<FamiliaReparacionResponse> buscarFamilia(@PathVariable Long id) {
+        return ResponseEntity.ok(catalogoService.buscarFamilia(id));
+    }
+
     @PostMapping("/familias")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<FamiliaReparacionResponse> crearFamilia(@Valid @RequestBody FamiliaReparacionRequest req) {
@@ -51,6 +56,11 @@ public class CatalogoController {
     public ResponseEntity<List<TipoReparacionCalzadoResponse>> listarTiposCalzado(
             @RequestParam(required = false) Long familiaId) {
         return ResponseEntity.ok(catalogoService.listarTiposCalzado(familiaId));
+    }
+
+    @GetMapping("/reparaciones-calzado/{id}")
+    public ResponseEntity<TipoReparacionCalzadoResponse> buscarTipoCalzado(@PathVariable Long id) {
+        return ResponseEntity.ok(catalogoService.buscarTipoCalzado(id));
     }
 
     @PostMapping("/reparaciones-calzado")
@@ -80,6 +90,11 @@ public class CatalogoController {
         return ResponseEntity.ok(catalogoService.listarTiposCostura());
     }
 
+    @GetMapping("/costuras/{id}")
+    public ResponseEntity<TipoCosturaResponse> buscarTipoCostura(@PathVariable Long id) {
+        return ResponseEntity.ok(catalogoService.buscarTipoCostura(id));
+    }
+
     @PostMapping("/costuras")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<TipoCosturaResponse> crearTipoCostura(@Valid @RequestBody TipoCosturaRequest req) {
@@ -105,6 +120,11 @@ public class CatalogoController {
     @GetMapping("/llaves")
     public ResponseEntity<List<TipoLlaveResponse>> listarTiposLlave() {
         return ResponseEntity.ok(catalogoService.listarTiposLlave());
+    }
+
+    @GetMapping("/llaves/{id}")
+    public ResponseEntity<TipoLlaveResponse> buscarTipoLlave(@PathVariable Long id) {
+        return ResponseEntity.ok(catalogoService.buscarTipoLlave(id));
     }
 
     @PostMapping("/llaves")

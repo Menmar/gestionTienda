@@ -1,61 +1,31 @@
 package com.menmar.gestionTienda.persistence.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-import java.util.Objects;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
-import lombok.ToString.Exclude;
-import org.hibernate.proxy.HibernateProxy;
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "foto")
-@Getter
-@Setter
-@ToString
-@RequiredArgsConstructor
-@AllArgsConstructor
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class Foto {
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @Exclude
-  private Reparacion reparacion;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-  @Column(name = "rutaFoto")
-  @Id
-  private String rutaFoto;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ticket_id", nullable = false)
+    private Ticket ticket;
 
-  @Override
-  public final boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null) {
-      return false;
-    }
-    Class<?> oEffectiveClass = o instanceof HibernateProxy
-        ? ((HibernateProxy) o).getHibernateLazyInitializer().getPersistentClass() : o.getClass();
-    Class<?> thisEffectiveClass = this instanceof HibernateProxy
-        ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass()
-        : this.getClass();
-    if (thisEffectiveClass != oEffectiveClass) {
-      return false;
-    }
-    Foto foto = (Foto) o;
-    return getRutaFoto() != null && Objects.equals(getRutaFoto(), foto.getRutaFoto());
-  }
+    @Column(name = "ruta_local", nullable = false, length = 512)
+    private String rutaLocal;
 
-  @Override
-  public final int hashCode() {
-    return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer()
-        .getPersistentClass()
-        .hashCode() : getClass().hashCode();
-  }
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private OffsetDateTime createdAt;
+
+    @PrePersist
+    void prePersist() {
+        if (createdAt == null) createdAt = OffsetDateTime.now();
+    }
 }

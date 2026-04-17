@@ -1,66 +1,49 @@
 package com.menmar.gestionTienda.controller;
 
-import com.menmar.gestionTienda.model.UsuarioDTO;
+import com.menmar.gestionTienda.model.usuario.UsuarioRequest;
+import com.menmar.gestionTienda.model.usuario.UsuarioResponse;
 import com.menmar.gestionTienda.service.UsuarioService;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/usuario")
+@RequestMapping("/usuarios")
+@RequiredArgsConstructor
+@PreAuthorize("hasRole('ADMIN')")
 public class UsuarioController {
 
-    @Autowired
-    UsuarioService usuarioService;
+    private final UsuarioService usuarioService;
 
-    /**
-     * Crea un nuevo usuario
-     *
-     * @param usuarioDTO
-     */
     @PostMapping
-    public UsuarioDTO crearUsuario(@RequestBody UsuarioDTO usuarioDTO) {
-        return usuarioService.creaUsuario(usuarioDTO);
+    public ResponseEntity<UsuarioResponse> crear(@Valid @RequestBody UsuarioRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(usuarioService.crear(request));
     }
 
-    /**
-     * Actualiza un usuario
-     *
-     * @param usuarioDTO
-     */
-    @PutMapping
-    public UsuarioDTO actualizarUsuario(@RequestBody UsuarioDTO usuarioDTO) {
-        return usuarioService.actualizaUsuario(usuarioDTO);
-    }
-
-    /**
-     * Borra un usuario
-     *
-     * @param usuarioDTO
-     */
-    @DeleteMapping
-    public Boolean borrarUsuario(@RequestBody UsuarioDTO usuarioDTO) {
-        usuarioService.borraUsuario(usuarioDTO);
-        return true;
-    }
-
-    /**
-     * Consulta todos los usuarios
-     */
     @GetMapping
-    public List<UsuarioDTO> consultarUsuario() {
-        return usuarioService.consultaUsuario();
+    public ResponseEntity<List<UsuarioResponse>> listar() {
+        return ResponseEntity.ok(usuarioService.listar());
     }
 
-    /**
-     * Consulta un usuario por id
-     *
-     * @param idUsuario
-     * @return
-     */
-    @GetMapping("/{idUsuario}")
-    public UsuarioDTO consultarUsuario(@PathVariable String idUsuario) {
-        return usuarioService.consultaUsuario(idUsuario);
+    @GetMapping("/{id}")
+    public ResponseEntity<UsuarioResponse> buscar(@PathVariable Long id) {
+        return ResponseEntity.ok(usuarioService.buscarPorId(id));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<UsuarioResponse> actualizar(@PathVariable Long id,
+                                                       @Valid @RequestBody UsuarioRequest request) {
+        return ResponseEntity.ok(usuarioService.actualizar(id, request));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> desactivar(@PathVariable Long id) {
+        usuarioService.desactivar(id);
+        return ResponseEntity.noContent().build();
     }
 }

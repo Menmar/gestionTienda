@@ -3,7 +3,9 @@ package com.menmar.gestionTienda.persistence.repository;
 import com.menmar.gestionTienda.persistence.entity.Usuario;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface UsuarioRepository extends JpaRepository<Usuario, String> {
+import java.util.Optional;
 
-  Usuario findUsuarioByIdUsuario(String idUsuario);
+public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
+    Optional<Usuario> findByEmail(String email);
+    boolean existsByEmail(String email);
 }

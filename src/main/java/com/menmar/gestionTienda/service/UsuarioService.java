@@ -1,6 +1,8 @@
 package com.menmar.gestionTienda.service;
 
 import com.menmar.gestionTienda.model.PageResponse;
+import com.menmar.gestionTienda.model.usuario.CambioPasswordRequest;
+import com.menmar.gestionTienda.model.usuario.ResetPasswordRequest;
 import com.menmar.gestionTienda.model.usuario.UsuarioRequest;
 import com.menmar.gestionTienda.model.usuario.UsuarioResponse;
 import org.springframework.data.domain.Pageable;
@@ -11,4 +13,6 @@ public interface UsuarioService {
     UsuarioResponse buscarPorId(Long id);
     UsuarioResponse actualizar(Long id, UsuarioRequest request);
     void desactivar(Long id);
+    void cambiarPassword(String emailEmpleado, CambioPasswordRequest request);
+    void resetPassword(Long id, ResetPasswordRequest request);
 }

@@ -2,6 +2,8 @@ package com.menmar.gestionTienda.service.impl;
 
 import com.menmar.gestionTienda.mapper.UsuarioMapper;
 import com.menmar.gestionTienda.model.PageResponse;
+import com.menmar.gestionTienda.model.usuario.CambioPasswordRequest;
+import com.menmar.gestionTienda.model.usuario.ResetPasswordRequest;
 import com.menmar.gestionTienda.model.usuario.UsuarioRequest;
 import com.menmar.gestionTienda.model.usuario.UsuarioResponse;
 import com.menmar.gestionTienda.persistence.entity.Usuario;
@@ -9,6 +11,7 @@ import com.menmar.gestionTienda.persistence.repository.UsuarioRepository;
 import com.menmar.gestionTienda.service.UsuarioService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,7 +36,7 @@ public class UsuarioServiceImpl implements UsuarioService {
                 .nombre(request.nombre())
                 .apellidos(request.apellidos())
                 .email(request.email())
-                .passwordHash(passwordEncoder.encode(request.password()))
+                .passwordHash(passwordEncoder.encode(request.passwordInicial()))
                 .rol(request.rol())
                 .activo(true)
                 .build();
@@ -59,8 +62,8 @@ public class UsuarioServiceImpl implements UsuarioService {
         usuario.setNombre(request.nombre());
         usuario.setApellidos(request.apellidos());
         usuario.setEmail(request.email());
-        usuario.setPasswordHash(passwordEncoder.encode(request.password()));
         usuario.setRol(request.rol());
+        // La contraseña no se modifica aquí; usar resetPassword o cambiarPassword
         return usuarioMapper.toResponse(usuarioRepository.save(usuario));
     }
 
@@ -69,6 +72,27 @@ public class UsuarioServiceImpl implements UsuarioService {
     public void desactivar(Long id) {
         var usuario = findOrThrow(id);
         usuario.setActivo(false);
+        usuarioRepository.save(usuario);
+    }
+
+    @Override
+    @Transactional
+    public void cambiarPassword(String emailEmpleado, CambioPasswordRequest request) {
+        var usuario = usuarioRepository.findByEmail(emailEmpleado)
+                .orElseThrow(() -> new NoSuchElementException("Usuario no encontrado: " + emailEmpleado));
+
+        if (!passwordEncoder.matches(request.passwordActual(), usuario.getPasswordHash())) {
+            throw new BadCredentialsException("La contraseña actual no es correcta");
+        }
+        usuario.setPasswordHash(passwordEncoder.encode(request.passwordNueva()));
+        usuarioRepository.save(usuario);
+    }
+
+    @Override
+    @Transactional
+    public void resetPassword(Long id, ResetPasswordRequest request) {
+        var usuario = findOrThrow(id);
+        usuario.setPasswordHash(passwordEncoder.encode(request.passwordNueva()));
         usuarioRepository.save(usuario);
     }
 

@@ -1,19 +1,24 @@
 package com.menmar.gestionTienda.service.impl;
 
 import com.menmar.gestionTienda.mapper.TicketMapper;
+import com.menmar.gestionTienda.model.PageResponse;
 import com.menmar.gestionTienda.model.ticket.CambioEstadoRequest;
 import com.menmar.gestionTienda.model.ticket.TicketRequest;
 import com.menmar.gestionTienda.model.ticket.TicketResponse;
 import com.menmar.gestionTienda.persistence.entity.*;
 import com.menmar.gestionTienda.persistence.repository.*;
 import com.menmar.gestionTienda.service.TicketService;
+import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -140,26 +145,15 @@ public class TicketServiceImpl implements TicketService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<TicketResponse> listar() {
-        return ticketRepository.findAll().stream().map(ticketMapper::toResponse).toList();
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<TicketResponse> listarPorCliente(Long clienteId) {
-        return ticketRepository.findByClienteId(clienteId).stream().map(ticketMapper::toResponse).toList();
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<TicketResponse> listarPorEstado(EstadoTicket estado) {
-        return ticketRepository.findByEstado(estado).stream().map(ticketMapper::toResponse).toList();
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<TicketResponse> listarPorTipo(TipoTicket tipo) {
-        return ticketRepository.findByTipo(tipo).stream().map(ticketMapper::toResponse).toList();
+    public PageResponse<TicketResponse> listar(EstadoTicket estado, TipoTicket tipo, Long clienteId, Pageable pageable) {
+        Specification<Ticket> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            if (estado != null) predicates.add(cb.equal(root.get("estado"), estado));
+            if (tipo != null) predicates.add(cb.equal(root.get("tipo"), tipo));
+            if (clienteId != null) predicates.add(cb.equal(root.get("cliente").get("id"), clienteId));
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+        return PageResponse.of(ticketRepository.findAll(spec, pageable).map(ticketMapper::toResponse));
     }
 
     @Override

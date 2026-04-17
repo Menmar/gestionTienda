@@ -1,16 +1,17 @@
 package com.menmar.gestionTienda.service.impl;
 
 import com.menmar.gestionTienda.mapper.ClienteMapper;
+import com.menmar.gestionTienda.model.PageResponse;
 import com.menmar.gestionTienda.model.cliente.ClienteRequest;
 import com.menmar.gestionTienda.model.cliente.ClienteResponse;
 import com.menmar.gestionTienda.persistence.entity.Cliente;
 import com.menmar.gestionTienda.persistence.repository.ClienteRepository;
 import com.menmar.gestionTienda.service.ClienteService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.NoSuchElementException;
 
 @Service
@@ -31,8 +32,8 @@ public class ClienteServiceImpl implements ClienteService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ClienteResponse> listar() {
-        return clienteRepository.findAll().stream().map(clienteMapper::toResponse).toList();
+    public PageResponse<ClienteResponse> listar(Pageable pageable) {
+        return PageResponse.of(clienteRepository.findAll(pageable).map(clienteMapper::toResponse));
     }
 
     @Override

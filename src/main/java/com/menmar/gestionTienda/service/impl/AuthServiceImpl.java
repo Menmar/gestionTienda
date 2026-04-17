@@ -1,5 +1,6 @@
 package com.menmar.gestionTienda.service.impl;
 
+import com.menmar.gestionTienda.config.AppProperties;
 import com.menmar.gestionTienda.model.auth.LoginRequest;
 import com.menmar.gestionTienda.model.auth.LoginResponse;
 import com.menmar.gestionTienda.model.auth.RefreshRequest;
@@ -10,7 +11,6 @@ import com.menmar.gestionTienda.persistence.repository.UsuarioRepository;
 import com.menmar.gestionTienda.security.JwtService;
 import com.menmar.gestionTienda.service.AuthService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -27,9 +27,7 @@ public class AuthServiceImpl implements AuthService {
     private final UsuarioRepository usuarioRepository;
     private final TokenRepository tokenRepository;
     private final JwtService jwtService;
-
-    @Value("${app.jwt.refresh-expiration-ms}")
-    private long refreshExpirationMs;
+    private final AppProperties appProperties;
 
     @Override
     @Transactional
@@ -48,7 +46,7 @@ public class AuthServiceImpl implements AuthService {
         tokenRepository.save(Token.builder()
                 .usuario(usuario)
                 .token(refreshToken)
-                .expiracion(OffsetDateTime.now().plusSeconds(refreshExpirationMs / 1000))
+                .expiracion(OffsetDateTime.now().plusSeconds(appProperties.jwt().refreshExpirationMs() / 1000))
                 .revocado(false)
                 .build());
 
@@ -77,7 +75,7 @@ public class AuthServiceImpl implements AuthService {
         tokenRepository.save(Token.builder()
                 .usuario(usuario)
                 .token(newRefreshToken)
-                .expiracion(OffsetDateTime.now().plusSeconds(refreshExpirationMs / 1000))
+                .expiracion(OffsetDateTime.now().plusSeconds(appProperties.jwt().refreshExpirationMs() / 1000))
                 .revocado(false)
                 .build());
 

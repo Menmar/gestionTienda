@@ -1,17 +1,18 @@
 package com.menmar.gestionTienda.service.impl;
 
 import com.menmar.gestionTienda.mapper.UsuarioMapper;
+import com.menmar.gestionTienda.model.PageResponse;
 import com.menmar.gestionTienda.model.usuario.UsuarioRequest;
 import com.menmar.gestionTienda.model.usuario.UsuarioResponse;
 import com.menmar.gestionTienda.persistence.entity.Usuario;
 import com.menmar.gestionTienda.persistence.repository.UsuarioRepository;
 import com.menmar.gestionTienda.service.UsuarioService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.NoSuchElementException;
 
 @Service
@@ -28,7 +29,7 @@ public class UsuarioServiceImpl implements UsuarioService {
         if (usuarioRepository.existsByEmail(request.email())) {
             throw new IllegalArgumentException("Ya existe un usuario con el email: " + request.email());
         }
-        Usuario usuario = Usuario.builder()
+        var usuario = Usuario.builder()
                 .nombre(request.nombre())
                 .apellidos(request.apellidos())
                 .email(request.email())
@@ -41,8 +42,8 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<UsuarioResponse> listar() {
-        return usuarioRepository.findAll().stream().map(usuarioMapper::toResponse).toList();
+    public PageResponse<UsuarioResponse> listar(Pageable pageable) {
+        return PageResponse.of(usuarioRepository.findAll(pageable).map(usuarioMapper::toResponse));
     }
 
     @Override
@@ -54,7 +55,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Override
     @Transactional
     public UsuarioResponse actualizar(Long id, UsuarioRequest request) {
-        Usuario usuario = findOrThrow(id);
+        var usuario = findOrThrow(id);
         usuario.setNombre(request.nombre());
         usuario.setApellidos(request.apellidos());
         usuario.setEmail(request.email());
@@ -66,7 +67,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Override
     @Transactional
     public void desactivar(Long id) {
-        Usuario usuario = findOrThrow(id);
+        var usuario = findOrThrow(id);
         usuario.setActivo(false);
         usuarioRepository.save(usuario);
     }

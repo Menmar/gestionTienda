@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.27.xsd">
+
+    <!--
+        Usuarios de prueba — solo se aplican con context "test".
+        Passwords encriptados con BCrypt (cost 10):
+          Admin1234!   -> $2a$10$hVZzZkrk3lNrBgMqK6mLx.6tDBaH/xSjC6KJBifhbGpADvEP8MVcG
+          Empleado1!   -> $2a$10$2JLqjQVwBa4HYFWkCJhCbO8yAYfRm6Ws3k0hmf0cBJVOUSMh8v1iO
+    -->
+    <changeSet id="v2-test-users" author="menmar" context="test">
+        <insert tableName="usuario">
+            <column name="nombre"        value="Admin"/>
+            <column name="apellidos"     value="Test"/>
+            <column name="email"         value="admin@tienda.com"/>
+            <column name="password_hash" value="$2a$10$hVZzZkrk3lNrBgMqK6mLx.6tDBaH/xSjC6KJBifhbGpADvEP8MVcG"/>
+            <column name="rol"           value="ADMIN"/>
+            <column name="activo"        valueBoolean="true"/>
+        </insert>
+        <insert tableName="usuario">
+            <column name="nombre"        value="Empleado"/>
+            <column name="apellidos"     value="Test"/>
+            <column name="email"         value="empleado@tienda.com"/>
+            <column name="password_hash" value="$2a$10$2JLqjQVwBa4HYFWkCJhCbO8yAYfRm6Ws3k0hmf0cBJVOUSMh8v1iO"/>
+            <column name="rol"           value="EMPLEADO"/>
+            <column name="activo"        valueBoolean="true"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>

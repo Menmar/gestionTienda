@@ -1,5 +1,6 @@
 package com.menmar.gestionTienda.model.ticket;
 
+import com.menmar.gestionTienda.model.foto.FotoResponse;
 import com.menmar.gestionTienda.persistence.entity.EstadoTicket;
 import com.menmar.gestionTienda.persistence.entity.TipoTicket;
 
@@ -26,5 +27,6 @@ public record TicketResponse(
         OffsetDateTime createdAt,
         List<LineaResponse> lineasCalzado,
         List<LineaResponse> lineasCostura,
-        List<LineaResponse> lineasLlave
+        List<LineaResponse> lineasLlave,
+        List<FotoResponse> fotos
 ) {}

@@ -3,8 +3,6 @@ package com.menmar.gestionTienda;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.menmar.gestionTienda.model.auth.LoginRequest;
 import com.menmar.gestionTienda.model.auth.LoginResponse;
-import com.menmar.gestionTienda.model.usuario.UsuarioRequest;
-import com.menmar.gestionTienda.persistence.entity.RolUsuario;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -20,7 +18,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
 @Testcontainers
 @ActiveProfiles("test")

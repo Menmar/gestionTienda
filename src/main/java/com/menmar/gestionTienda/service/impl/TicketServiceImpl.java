@@ -12,7 +12,6 @@ import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,12 +35,11 @@ public class TicketServiceImpl implements TicketService {
 
     @Override
     @Transactional
-    public TicketResponse crear(TicketRequest request) {
-        Cliente cliente = clienteRepository.findById(request.clienteId())
+    public TicketResponse crear(TicketRequest request, String emailEmpleado) {
+        var cliente = clienteRepository.findById(request.clienteId())
                 .orElseThrow(() -> new NoSuchElementException("Cliente no encontrado: " + request.clienteId()));
 
-        String emailEmpleado = SecurityContextHolder.getContext().getAuthentication().getName();
-        Usuario empleado = usuarioRepository.findByEmail(emailEmpleado)
+        var empleado = usuarioRepository.findByEmail(emailEmpleado)
                 .orElseThrow(() -> new NoSuchElementException("Empleado no encontrado: " + emailEmpleado));
 
         Ticket ticket = Ticket.builder()

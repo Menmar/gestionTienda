@@ -9,7 +9,7 @@ import com.menmar.gestionTienda.persistence.entity.TipoTicket;
 import org.springframework.data.domain.Pageable;
 
 public interface TicketService {
-    TicketResponse crear(TicketRequest request);
+    TicketResponse crear(TicketRequest request, String emailEmpleado);
     TicketResponse buscarPorId(Long id);
     TicketResponse buscarPorNumero(String numero);
     PageResponse<TicketResponse> listar(EstadoTicket estado, TipoTicket tipo, Long clienteId, Pageable pageable);

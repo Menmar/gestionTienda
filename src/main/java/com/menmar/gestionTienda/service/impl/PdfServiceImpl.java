@@ -182,11 +182,12 @@ public class PdfServiceImpl implements PdfService {
     }
 
     private void agregarSeparador(Document doc) throws DocumentException {
-        var linea = new Paragraph(" ");
-        linea.setSpacingBefore(2);
-        linea.setSpacingAfter(2);
-        doc.add(new com.lowagie.text.pdf.draw.LineSeparator(0.5f, 100, COLOR_BORDE,
-                Element.ALIGN_CENTER, -2));
+        var ls = new com.lowagie.text.pdf.draw.LineSeparator(0.5f, 100, COLOR_BORDE,
+                Element.ALIGN_CENTER, -2);
+        var p = new Paragraph(new Chunk(ls));
+        p.setSpacingBefore(2);
+        p.setSpacingAfter(2);
+        doc.add(p);
     }
 
     private static void agregarFilaTabla(PdfPTable tabla, String etiqueta, String valor) {

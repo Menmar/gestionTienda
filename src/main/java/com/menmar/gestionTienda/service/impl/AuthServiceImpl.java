@@ -13,7 +13,7 @@ import com.menmar.gestionTienda.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,8 +35,8 @@ public class AuthServiceImpl implements AuthService {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.email(), request.password()));
 
-        Usuario usuario = usuarioRepository.findByEmail(request.email())
-                .orElseThrow(() -> new UsernameNotFoundException(request.email()));
+        var usuario = usuarioRepository.findByEmail(request.email())
+                .orElseThrow(() -> new BadCredentialsException("Credenciales incorrectas"));
 
         tokenRepository.revocarTokensDeUsuario(usuario.getId());
 

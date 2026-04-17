@@ -42,11 +42,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails user = userDetailsService.loadUserByUsername(email);
 
-            boolean tokenActivo = tokenRepository.findByToken(jwt)
+            // Solo los refresh tokens se guardan en la tabla token.
+            // Si el token no está en la tabla, es un access token válido (no revocado).
+            boolean noRevocado = tokenRepository.findByToken(jwt)
                     .map(t -> !t.isRevocado())
-                    .orElse(false);
+                    .orElse(true);
 
-            if (jwtService.esValido(jwt, user) && tokenActivo) {
+            if (jwtService.esValido(jwt, user) && noRevocado) {
                 UsernamePasswordAuthenticationToken auth =
                         new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
                 auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));

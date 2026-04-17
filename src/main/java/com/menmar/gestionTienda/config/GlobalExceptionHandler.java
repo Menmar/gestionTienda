@@ -1,5 +1,6 @@
 package com.menmar.gestionTienda.config;
 
+import io.jsonwebtoken.JwtException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.security.access.AccessDeniedException;
@@ -42,6 +43,12 @@ public class GlobalExceptionHandler {
                 .reduce((a, b) -> a + "; " + b)
                 .orElse("Error de validación");
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, detail);
+    }
+
+    // Tokens mal formados, firma inválida, expirados, etc.
+    @ExceptionHandler(JwtException.class)
+    public ProblemDetail handleJwt(JwtException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, "Token inválido o expirado");
     }
 
     @ExceptionHandler(MaxUploadSizeExceededException.class)

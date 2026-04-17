@@ -29,13 +29,23 @@ public class FotoServiceImpl implements FotoService {
     private final TicketRepository ticketRepository;
     private final AppProperties appProperties;
 
+    private static final java.util.Set<String> EXTENSIONES_PERMITIDAS =
+            java.util.Set.of(".jpg", ".jpeg", ".png", ".webp", ".gif");
+
     @Override
     @Transactional
     public FotoResponse subir(Long ticketId, MultipartFile fichero) {
         var ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new NoSuchElementException("Ticket no encontrado: " + ticketId));
 
+        if (fichero.isEmpty()) {
+            throw new IllegalArgumentException("El fichero no puede estar vacío");
+        }
         var extension = extensionDe(fichero.getOriginalFilename());
+        if (!EXTENSIONES_PERMITIDAS.contains(extension)) {
+            throw new IllegalArgumentException(
+                    "Tipo de fichero no permitido. Use: " + EXTENSIONES_PERMITIDAS);
+        }
         var nombreFichero = UUID.randomUUID() + extension;
         var destino = directorioTicket(ticketId).resolve(nombreFichero);
 

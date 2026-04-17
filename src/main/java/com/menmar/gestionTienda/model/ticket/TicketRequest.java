@@ -1,6 +1,7 @@
 package com.menmar.gestionTienda.model.ticket;
 
 import com.menmar.gestionTienda.persistence.entity.TipoTicket;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
@@ -11,7 +12,7 @@ public record TicketRequest(
         @NotNull Long clienteId,
         LocalDate fechaPrevista,
         String observaciones,
-        List<LineaCalzadoRequest> lineasCalzado,
-        List<LineaCosturaRequest> lineasCostura,
-        List<LineaLlaveRequest> lineasLlave
+        @Valid List<LineaCalzadoRequest> lineasCalzado,
+        @Valid List<LineaCosturaRequest> lineasCostura,
+        @Valid List<LineaLlaveRequest> lineasLlave
 ) {}

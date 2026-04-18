@@ -1,0 +1,23 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/gestion_tienda_test
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.xml
+    contexts: test
+
+app:
+  jwt:
+    secret: test-secret-key-must-be-at-least-32-characters-long-for-hmac
+    expiration-ms: 900000
+    refresh-expiration-ms: 604800000
+  fotos:
+    directorio: ${java.io.tmpdir}/gestion-tienda-test/fotos

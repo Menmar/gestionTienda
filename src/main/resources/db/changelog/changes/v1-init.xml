@@ -1,0 +1,380 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.27.xsd">
+
+    <!-- ================================================================
+         AUTENTICACIÓN
+         ================================================================ -->
+
+    <changeSet id="1-create-usuario" author="menmar">
+        <createTable tableName="usuario">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="nombre" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="apellidos" type="VARCHAR(150)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="email" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true" uniqueConstraintName="uq_usuario_email"/>
+            </column>
+            <column name="password_hash" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rol" type="VARCHAR(20)" defaultValue="EMPLEADO">
+                <constraints nullable="false"/>
+            </column>
+            <column name="activo" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="NOW()">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <sql>ALTER TABLE usuario ADD CONSTRAINT chk_usuario_rol CHECK (rol IN ('ADMIN', 'EMPLEADO'))</sql>
+    </changeSet>
+
+    <changeSet id="2-create-token" author="menmar">
+        <createTable tableName="token">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="usuario_id" type="BIGINT">
+                <constraints nullable="false"
+                             foreignKeyName="fk_token_usuario"
+                             references="usuario(id)"/>
+            </column>
+            <column name="token" type="VARCHAR(512)">
+                <constraints nullable="false" unique="true" uniqueConstraintName="uq_token_value"/>
+            </column>
+            <column name="expiracion" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="revocado" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="NOW()">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex indexName="idx_token_usuario_id" tableName="token">
+            <column name="usuario_id"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- ================================================================
+         CLIENTE
+         ================================================================ -->
+
+    <changeSet id="3-create-cliente" author="menmar">
+        <createTable tableName="cliente">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="nombre" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="apellidos" type="VARCHAR(150)"/>
+            <column name="telefono" type="VARCHAR(20)">
+                <constraints nullable="false" unique="true" uniqueConstraintName="uq_cliente_telefono"/>
+            </column>
+            <column name="email" type="VARCHAR(255)"/>
+            <column name="created_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="NOW()">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex indexName="idx_cliente_nombre" tableName="cliente">
+            <column name="nombre"/>
+            <column name="apellidos"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- ================================================================
+         TICKET BASE
+         ================================================================ -->
+
+    <!-- Secuencias por tipo para numero_ticket -->
+    <changeSet id="4-create-ticket-sequences" author="menmar">
+        <createSequence sequenceName="seq_ticket_calzado" startValue="1" incrementBy="1"/>
+        <createSequence sequenceName="seq_ticket_costura" startValue="1" incrementBy="1"/>
+        <createSequence sequenceName="seq_ticket_llave"   startValue="1" incrementBy="1"/>
+    </changeSet>
+
+    <changeSet id="5-create-ticket" author="menmar">
+        <createTable tableName="ticket">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="numero_ticket" type="VARCHAR(20)">
+                <constraints nullable="false" unique="true" uniqueConstraintName="uq_ticket_numero"/>
+            </column>
+            <column name="tipo" type="VARCHAR(10)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="cliente_id" type="BIGINT">
+                <constraints nullable="false"
+                             foreignKeyName="fk_ticket_cliente"
+                             references="cliente(id)"/>
+            </column>
+            <column name="empleado_id" type="BIGINT">
+                <constraints nullable="false"
+                             foreignKeyName="fk_ticket_empleado"
+                             references="usuario(id)"/>
+            </column>
+            <column name="estado" type="VARCHAR(15)" defaultValue="PENDIENTE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="precio_total" type="NUMERIC(10,2)"/>
+            <column name="fecha_entrada" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="fecha_prevista" type="DATE"/>
+            <column name="fecha_entrega" type="DATE"/>
+            <column name="observaciones" type="TEXT"/>
+            <column name="created_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="NOW()">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <sql>ALTER TABLE ticket ADD CONSTRAINT chk_ticket_tipo   CHECK (tipo   IN ('CALZADO', 'COSTURA', 'LLAVE'))</sql>
+        <sql>ALTER TABLE ticket ADD CONSTRAINT chk_ticket_estado CHECK (estado IN ('PENDIENTE', 'EN_PROCESO', 'LISTO', 'ENTREGADO', 'CANCELADO'))</sql>
+        <createIndex indexName="idx_ticket_cliente_id" tableName="ticket">
+            <column name="cliente_id"/>
+        </createIndex>
+        <createIndex indexName="idx_ticket_empleado_id" tableName="ticket">
+            <column name="empleado_id"/>
+        </createIndex>
+        <createIndex indexName="idx_ticket_estado" tableName="ticket">
+            <column name="estado"/>
+        </createIndex>
+        <createIndex indexName="idx_ticket_fecha_entrada" tableName="ticket">
+            <column name="fecha_entrada"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- ================================================================
+         CALZADO
+         ================================================================ -->
+
+    <changeSet id="6-create-familia-reparacion" author="menmar">
+        <createTable tableName="familia_reparacion">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="nombre" type="VARCHAR(100)">
+                <constraints nullable="false" unique="true" uniqueConstraintName="uq_familia_nombre"/>
+            </column>
+            <column name="activo" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="7-create-tipo-reparacion-calzado" author="menmar">
+        <createTable tableName="tipo_reparacion_calzado">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="nombre" type="VARCHAR(150)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="precio_base" type="NUMERIC(10,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="familia_id" type="BIGINT">
+                <constraints nullable="false"
+                             foreignKeyName="fk_tipo_reparacion_familia"
+                             references="familia_reparacion(id)"/>
+            </column>
+            <column name="activo" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex indexName="idx_tipo_rep_familia" tableName="tipo_reparacion_calzado">
+            <column name="familia_id"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="8-create-ticket-calzado-linea" author="menmar">
+        <createTable tableName="ticket_calzado_linea">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="ticket_id" type="BIGINT">
+                <constraints nullable="false"
+                             foreignKeyName="fk_cal_linea_ticket"
+                             references="ticket(id)"/>
+            </column>
+            <column name="tipo_reparacion_id" type="BIGINT">
+                <constraints nullable="false"
+                             foreignKeyName="fk_cal_linea_tipo"
+                             references="tipo_reparacion_calzado(id)"/>
+            </column>
+            <column name="cantidad" type="SMALLINT" defaultValueNumeric="1">
+                <constraints nullable="false"/>
+            </column>
+            <column name="precio_unitario" type="NUMERIC(10,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="descripcion" type="VARCHAR(255)"/>
+        </createTable>
+        <createIndex indexName="idx_cal_linea_ticket" tableName="ticket_calzado_linea">
+            <column name="ticket_id"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- ================================================================
+         COSTURA
+         ================================================================ -->
+
+    <changeSet id="9-create-tipo-costura" author="menmar">
+        <createTable tableName="tipo_costura">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="nombre" type="VARCHAR(150)">
+                <constraints nullable="false" unique="true" uniqueConstraintName="uq_tipo_costura_nombre"/>
+            </column>
+            <column name="precio_base" type="NUMERIC(10,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="activo" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="10-create-ticket-costura-linea" author="menmar">
+        <createTable tableName="ticket_costura_linea">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="ticket_id" type="BIGINT">
+                <constraints nullable="false"
+                             foreignKeyName="fk_cos_linea_ticket"
+                             references="ticket(id)"/>
+            </column>
+            <column name="tipo_costura_id" type="BIGINT">
+                <constraints nullable="false"
+                             foreignKeyName="fk_cos_linea_tipo"
+                             references="tipo_costura(id)"/>
+            </column>
+            <column name="cantidad" type="SMALLINT" defaultValueNumeric="1">
+                <constraints nullable="false"/>
+            </column>
+            <column name="precio_unitario" type="NUMERIC(10,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="descripcion" type="VARCHAR(255)"/>
+        </createTable>
+        <createIndex indexName="idx_cos_linea_ticket" tableName="ticket_costura_linea">
+            <column name="ticket_id"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- ================================================================
+         LLAVES
+         ================================================================ -->
+
+    <changeSet id="11-create-tipo-llave" author="menmar">
+        <createTable tableName="tipo_llave">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="nombre" type="VARCHAR(150)">
+                <constraints nullable="false" unique="true" uniqueConstraintName="uq_tipo_llave_nombre"/>
+            </column>
+            <column name="precio_base" type="NUMERIC(10,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="activo" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="12-create-ticket-llave-linea" author="menmar">
+        <createTable tableName="ticket_llave_linea">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="ticket_id" type="BIGINT">
+                <constraints nullable="false"
+                             foreignKeyName="fk_lla_linea_ticket"
+                             references="ticket(id)"/>
+            </column>
+            <column name="tipo_llave_id" type="BIGINT">
+                <constraints nullable="false"
+                             foreignKeyName="fk_lla_linea_tipo"
+                             references="tipo_llave(id)"/>
+            </column>
+            <column name="cantidad" type="SMALLINT" defaultValueNumeric="1">
+                <constraints nullable="false"/>
+            </column>
+            <column name="precio_unitario" type="NUMERIC(10,2)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex indexName="idx_lla_linea_ticket" tableName="ticket_llave_linea">
+            <column name="ticket_id"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- ================================================================
+         FOTOS
+         ================================================================ -->
+
+    <changeSet id="13-create-foto" author="menmar">
+        <createTable tableName="foto">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="ticket_id" type="BIGINT">
+                <constraints nullable="false"
+                             foreignKeyName="fk_foto_ticket"
+                             references="ticket(id)"/>
+            </column>
+            <column name="ruta_local" type="VARCHAR(512)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="NOW()">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex indexName="idx_foto_ticket" tableName="foto">
+            <column name="ticket_id"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- ================================================================
+         DATOS INICIALES
+         ================================================================ -->
+
+    <changeSet id="14-seed-familias-reparacion" author="menmar">
+        <insert tableName="familia_reparacion"><column name="nombre" value="Suela"/></insert>
+        <insert tableName="familia_reparacion"><column name="nombre" value="Tacón"/></insert>
+        <insert tableName="familia_reparacion"><column name="nombre" value="Cosido"/></insert>
+        <insert tableName="familia_reparacion"><column name="nombre" value="Cremallera"/></insert>
+        <insert tableName="familia_reparacion"><column name="nombre" value="Plantilla"/></insert>
+    </changeSet>
+
+    <changeSet id="15-seed-tipos-llave" author="menmar">
+        <insert tableName="tipo_llave"><column name="nombre" value="Yale"/><column name="precio_base" value="3.50"/></insert>
+        <insert tableName="tipo_llave"><column name="nombre" value="Seguridad"/><column name="precio_base" value="8.00"/></insert>
+        <insert tableName="tipo_llave"><column name="nombre" value="Coche"/><column name="precio_base" value="12.00"/></insert>
+        <insert tableName="tipo_llave"><column name="nombre" value="Mando garage"/><column name="precio_base" value="25.00"/></insert>
+        <insert tableName="tipo_llave"><column name="nombre" value="Tubular"/><column name="precio_base" value="5.00"/></insert>
+    </changeSet>
+
+    <changeSet id="16-seed-tipos-costura" author="menmar">
+        <insert tableName="tipo_costura"><column name="nombre" value="Ropa"/><column name="precio_base" value="5.00"/></insert>
+        <insert tableName="tipo_costura"><column name="nombre" value="Bolso"/><column name="precio_base" value="8.00"/></insert>
+        <insert tableName="tipo_costura"><column name="nombre" value="Cinturón"/><column name="precio_base" value="4.00"/></insert>
+        <insert tableName="tipo_costura"><column name="nombre" value="Marroquinería"/><column name="precio_base" value="10.00"/></insert>
+    </changeSet>
+
+</databaseChangeLog>

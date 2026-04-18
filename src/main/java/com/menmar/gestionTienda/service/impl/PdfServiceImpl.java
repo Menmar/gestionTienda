@@ -106,13 +106,7 @@ public class PdfServiceImpl implements PdfService {
         tabla.setSpacingBefore(6);
         tabla.setSpacingAfter(6);
 
-        var tipo = switch (ticket.getTipo()) {
-            case CALZADO -> "Reparación calzado";
-            case COSTURA -> "Costura";
-            case LLAVE   -> "Duplicado de llaves";
-        };
-
-        agregarFilaTabla(tabla, "Tipo", tipo);
+        agregarFilaTabla(tabla, "Tipo", ticket.getTipo().etiqueta);
         agregarFilaTabla(tabla, "Cliente",
                 ticket.getCliente().getNombre() + " " +
                 (ticket.getCliente().getApellidos() != null ? ticket.getCliente().getApellidos() : ""));

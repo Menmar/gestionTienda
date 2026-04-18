@@ -11,5 +11,10 @@ public record AppProperties(Jwt jwt, Fotos fotos, Admin admin, Notificaciones no
 
     public record Admin(String email, String nombre, String apellidos, String password) {}
 
-    public record Notificaciones(String callmebotApiKey, String telegramBotToken) {}
+    public record Notificaciones(
+            String callmebotApiKey,
+            String telegramBotToken,
+            String callmebotBaseUrl,
+            String telegramBaseUrl
+    ) {}
 }

@@ -1,6 +1,6 @@
 package com.menmar.gestionTienda.exception;
 
-public class RecursoNoEncontradoException extends RuntimeException {
+public final class RecursoNoEncontradoException extends AppException {
     public RecursoNoEncontradoException(String mensaje) {
         super(mensaje);
     }

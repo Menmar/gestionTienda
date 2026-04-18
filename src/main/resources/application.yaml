@@ -65,3 +65,5 @@ app:
   notificaciones:
     callmebot-api-key: ${CALLMEBOT_API_KEY:}
     telegram-bot-token: ${TELEGRAM_BOT_TOKEN:}
+    callmebot-base-url: https://api.callmebot.com/whatsapp.php
+    telegram-base-url: https://api.telegram.org

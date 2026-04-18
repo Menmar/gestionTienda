@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.27.xsd">
+
+    <!-- ================================================================
+         CLIENTE: reemplazar booleanos de notificación por tabla de canales
+         ================================================================ -->
+
+    <changeSet id="v7-create-cliente-canal-notificacion" author="menmar">
+        <createTable tableName="cliente_canal_notificacion">
+            <column name="cliente_id" type="BIGINT">
+                <constraints nullable="false"
+                             foreignKeyName="fk_ccn_cliente"
+                             references="cliente(id)"/>
+            </column>
+            <column name="canal" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addPrimaryKey tableName="cliente_canal_notificacion"
+                       columnNames="cliente_id, canal"
+                       constraintName="pk_cliente_canal_notificacion"/>
+        <sql>ALTER TABLE cliente_canal_notificacion
+             ADD CONSTRAINT chk_canal CHECK (canal IN ('EMAIL', 'WHATSAPP', 'TELEGRAM'))</sql>
+    </changeSet>
+
+    <changeSet id="v7-migrate-notif-booleans" author="menmar">
+        <sql>INSERT INTO cliente_canal_notificacion (cliente_id, canal)
+             SELECT id, 'EMAIL'    FROM cliente WHERE notif_email    = true</sql>
+        <sql>INSERT INTO cliente_canal_notificacion (cliente_id, canal)
+             SELECT id, 'WHATSAPP' FROM cliente WHERE notif_whatsapp = true</sql>
+        <sql>INSERT INTO cliente_canal_notificacion (cliente_id, canal)
+             SELECT id, 'TELEGRAM' FROM cliente WHERE notif_telegram = true</sql>
+    </changeSet>
+
+    <changeSet id="v7-drop-notif-booleans" author="menmar">
+        <dropColumn tableName="cliente" columnName="notif_email"/>
+        <dropColumn tableName="cliente" columnName="notif_whatsapp"/>
+        <dropColumn tableName="cliente" columnName="notif_telegram"/>
+    </changeSet>
+
+</databaseChangeLog>

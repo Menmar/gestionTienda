@@ -181,18 +181,8 @@ public class TicketServiceImpl implements TicketService {
     }
 
     private String generarNumeroTicket(TipoTicket tipo) {
-        String seq = switch (tipo) {
-            case CALZADO -> "seq_ticket_calzado";
-            case COSTURA -> "seq_ticket_costura";
-            case LLAVE   -> "seq_ticket_llave";
-        };
-        String prefijo = switch (tipo) {
-            case CALZADO -> "CAL";
-            case COSTURA -> "COS";
-            case LLAVE   -> "LLA";
-        };
-        long next = ticketRepository.nextVal(seq);
-        return "%s-%05d".formatted(prefijo, next);
+        long next = ticketRepository.nextVal(tipo.secuencia);
+        return "%s-%05d".formatted(tipo.prefijo, next);
     }
 
     @Override
@@ -227,6 +217,10 @@ public class TicketServiceImpl implements TicketService {
     public TicketResponse cambiarEstado(Long id, CambioEstadoRequest request) {
         Ticket ticket = findOrThrow(id);
         var estadoAnterior = ticket.getEstado();
+        if (!estadoAnterior.puedeTransicionarA(request.estado())) {
+            throw new com.menmar.gestionTienda.exception.NegocioException(
+                    "Transición de estado no permitida: %s → %s".formatted(estadoAnterior, request.estado()));
+        }
         if (request.estado() == EstadoTicket.ENTREGADO) {
             ticket.setFechaEntrega(LocalDate.now());
         }

@@ -1,6 +1,6 @@
 package com.menmar.gestionTienda.exception;
 
-public class ConflictoException extends RuntimeException {
+public final class ConflictoException extends AppException {
     public ConflictoException(String mensaje) {
         super(mensaje);
     }

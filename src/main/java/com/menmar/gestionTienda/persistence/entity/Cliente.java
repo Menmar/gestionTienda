@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.OffsetDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "cliente")
@@ -26,17 +28,13 @@ public class Cliente {
     @Column(length = 255)
     private String email;
 
-    @Column(name = "notif_email", nullable = false)
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "cliente_canal_notificacion",
+                     joinColumns = @JoinColumn(name = "cliente_id"))
+    @Column(name = "canal")
+    @Enumerated(EnumType.STRING)
     @Builder.Default
-    private boolean notifEmail = false;
-
-    @Column(name = "notif_whatsapp", nullable = false)
-    @Builder.Default
-    private boolean notifWhatsapp = false;
-
-    @Column(name = "notif_telegram", nullable = false)
-    @Builder.Default
-    private boolean notifTelegram = false;
+    private Set<CanalNotificacion> canalesNotificacion = new HashSet<>();
 
     @Column(name = "telegram_chat_id", length = 50)
     private String telegramChatId;

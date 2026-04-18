@@ -1,5 +1,6 @@
 package com.menmar.gestionTienda.config;
 
+import com.menmar.gestionTienda.exception.AppException;
 import com.menmar.gestionTienda.exception.ConflictoException;
 import com.menmar.gestionTienda.exception.NegocioException;
 import com.menmar.gestionTienda.exception.RecursoNoEncontradoException;
@@ -19,19 +20,14 @@ import java.util.NoSuchElementException;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(RecursoNoEncontradoException.class)
-    public ProblemDetail handleRecursoNoEncontrado(RecursoNoEncontradoException ex) {
-        return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
-    }
-
-    @ExceptionHandler(NegocioException.class)
-    public ProblemDetail handleNegocio(NegocioException ex) {
-        return ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
-    }
-
-    @ExceptionHandler(ConflictoException.class)
-    public ProblemDetail handleConflicto(ConflictoException ex) {
-        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
+    @ExceptionHandler(AppException.class)
+    public ProblemDetail handleAppException(AppException ex) {
+        var status = switch (ex) {
+            case RecursoNoEncontradoException ignored -> HttpStatus.NOT_FOUND;
+            case NegocioException             ignored -> HttpStatus.UNPROCESSABLE_ENTITY;
+            case ConflictoException           ignored -> HttpStatus.CONFLICT;
+        };
+        return ProblemDetail.forStatusAndDetail(status, ex.getMessage());
     }
 
     @ExceptionHandler(NoSuchElementException.class)

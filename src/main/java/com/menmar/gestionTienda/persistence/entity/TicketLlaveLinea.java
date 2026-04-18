@@ -28,4 +28,8 @@ public class TicketLlaveLinea {
 
     @Column(name = "precio_unitario", nullable = false, precision = 10, scale = 2)
     private BigDecimal precioUnitario;
+
+    @Column(nullable = false, precision = 5, scale = 2)
+    @Builder.Default
+    private BigDecimal descuento = BigDecimal.ZERO;
 }

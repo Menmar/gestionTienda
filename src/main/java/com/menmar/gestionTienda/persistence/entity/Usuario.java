@@ -8,7 +8,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.OffsetDateTime;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "usuario")
@@ -40,6 +42,15 @@ public class Usuario implements UserDetails {
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt;
+
+    @ManyToMany
+    @JoinTable(
+        name = "usuario_establecimiento",
+        joinColumns = @JoinColumn(name = "usuario_id"),
+        inverseJoinColumns = @JoinColumn(name = "establecimiento_id")
+    )
+    @Builder.Default
+    private Set<Establecimiento> establecimientos = new HashSet<>();
 
     @PrePersist
     void prePersist() {

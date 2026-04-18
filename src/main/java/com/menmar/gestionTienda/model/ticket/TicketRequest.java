@@ -3,8 +3,11 @@ package com.menmar.gestionTienda.model.ticket;
 import com.menmar.gestionTienda.persistence.entity.TipoTicket;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -16,11 +19,23 @@ public record TicketRequest(
         @Schema(description = "ID del cliente propietario", example = "1")
         @NotNull Long clienteId,
 
+        @Schema(description = "ID del establecimiento donde se abre el ticket", example = "1")
+        Long establecimientoId,
+
         @Schema(description = "Fecha prevista de entrega (opcional)", example = "2024-02-15")
         LocalDate fechaPrevista,
 
         @Schema(description = "Observaciones internas (opcional)", example = "El cliente quiere tinte negro")
         String observaciones,
+
+        @Schema(description = "Descuento global sobre el total (0-100%)", example = "10.00")
+        @DecimalMin("0") @DecimalMax("100") BigDecimal descuentoTotal,
+
+        @Schema(description = "Si true, se añade IVA al total", example = "false")
+        Boolean aplicarIva,
+
+        @Schema(description = "Porcentaje de IVA (por defecto 21)", example = "21.00")
+        @DecimalMin("0") BigDecimal porcentajeIva,
 
         @Schema(description = "Líneas de reparación de calzado (puede estar vacío o ser nulo)")
         @Valid List<LineaCalzadoRequest> lineasCalzado,

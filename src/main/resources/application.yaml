@@ -40,6 +40,16 @@ springdoc:
     path: /swagger-ui.html
     operations-sorter: method
 
+spring:
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+
 app:
   jwt:
     secret: ${JWT_SECRET}
@@ -47,3 +57,11 @@ app:
     refresh-expiration-ms: 604800000
   fotos:
     directorio: ${FOTOS_DIR:./uploads/fotos}
+  admin:
+    email: ${ADMIN_EMAIL:}
+    nombre: ${ADMIN_NOMBRE:Admin}
+    apellidos: ${ADMIN_APELLIDOS:Sistema}
+    password: ${ADMIN_PASSWORD:}
+  notificaciones:
+    callmebot-api-key: ${CALLMEBOT_API_KEY:}
+    telegram-bot-token: ${TELEGRAM_BOT_TOKEN:}

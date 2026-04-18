@@ -63,17 +63,34 @@ public class PdfServiceImpl implements PdfService {
     }
 
     private void agregarCabecera(Document doc, Ticket ticket) throws DocumentException {
-        var fuenteTienda = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14, COLOR_CABECERA);
+        var fuenteTienda    = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14, COLOR_CABECERA);
         var fuenteSubtitulo = FontFactory.getFont(FontFactory.HELVETICA, 9, COLOR_SECCION);
+        var fuenteDatos     = FontFactory.getFont(FontFactory.HELVETICA, 8, COLOR_SECCION);
 
-        var titulo = new Paragraph("Reparaciones & Llaves", fuenteTienda);
+        var est = ticket.getEstablecimiento();
+        var nombreTienda = est != null ? est.getNombre() : "Reparaciones & Llaves";
+        var titulo = new Paragraph(nombreTienda, fuenteTienda);
         titulo.setAlignment(Element.ALIGN_CENTER);
         doc.add(titulo);
 
         var subtitulo = new Paragraph("Reparación de calzado · Duplicado de llaves", fuenteSubtitulo);
         subtitulo.setAlignment(Element.ALIGN_CENTER);
-        subtitulo.setSpacingAfter(4);
+        subtitulo.setSpacingAfter(2);
         doc.add(subtitulo);
+
+        if (est != null) {
+            if (est.getDireccion() != null) {
+                var dir = new Paragraph(est.getDireccion(), fuenteDatos);
+                dir.setAlignment(Element.ALIGN_CENTER);
+                doc.add(dir);
+            }
+            if (est.getTelefono() != null) {
+                var tel = new Paragraph("Tel. " + est.getTelefono(), fuenteDatos);
+                tel.setAlignment(Element.ALIGN_CENTER);
+                tel.setSpacingAfter(2);
+                doc.add(tel);
+            }
+        }
 
         var fuenteCodigo = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 22, COLOR_CABECERA);
         var codigo = new Paragraph(ticket.getNumeroTicket(), fuenteCodigo);
@@ -155,9 +172,22 @@ public class PdfServiceImpl implements PdfService {
     }
 
     private void agregarTotal(Document doc, Ticket ticket) throws DocumentException {
+        var fuenteInfo  = FontFactory.getFont(FontFactory.HELVETICA, 9, COLOR_SECCION);
         var fuenteTotal = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 13, COLOR_CABECERA);
-        var total = new Paragraph(
-                "TOTAL:  " + formatEuros(ticket.getPrecioTotal()), fuenteTotal);
+
+        if (ticket.getDescuentoTotal() != null &&
+                ticket.getDescuentoTotal().compareTo(java.math.BigDecimal.ZERO) > 0) {
+            var desc = new Paragraph("Descuento: " + ticket.getDescuentoTotal().toPlainString() + " %", fuenteInfo);
+            desc.setAlignment(Element.ALIGN_RIGHT);
+            doc.add(desc);
+        }
+        if (ticket.isAplicarIva()) {
+            var iva = new Paragraph("IVA: " + ticket.getPorcentajeIva().toPlainString() + " %", fuenteInfo);
+            iva.setAlignment(Element.ALIGN_RIGHT);
+            doc.add(iva);
+        }
+
+        var total = new Paragraph("TOTAL:  " + formatEuros(ticket.getPrecioTotal()), fuenteTotal);
         total.setAlignment(Element.ALIGN_RIGHT);
         total.setSpacingBefore(4);
         doc.add(total);

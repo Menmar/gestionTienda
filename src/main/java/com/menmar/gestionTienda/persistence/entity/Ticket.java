@@ -33,6 +33,10 @@ public class Ticket {
     @JoinColumn(name = "empleado_id", nullable = false)
     private Usuario empleado;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "establecimiento_id")
+    private Establecimiento establecimiento;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 15)
     @Builder.Default
@@ -40,6 +44,18 @@ public class Ticket {
 
     @Column(name = "precio_total", precision = 10, scale = 2)
     private BigDecimal precioTotal;
+
+    @Column(name = "descuento_total", nullable = false, precision = 5, scale = 2)
+    @Builder.Default
+    private BigDecimal descuentoTotal = BigDecimal.ZERO;
+
+    @Column(name = "aplicar_iva", nullable = false)
+    @Builder.Default
+    private boolean aplicarIva = false;
+
+    @Column(name = "porcentaje_iva", nullable = false, precision = 5, scale = 2)
+    @Builder.Default
+    private BigDecimal porcentajeIva = new BigDecimal("21.00");
 
     @Column(name = "fecha_entrada", nullable = false)
     private LocalDate fechaEntrada;
@@ -55,6 +71,9 @@ public class Ticket {
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt;
+
+    @Column(name = "updated_at")
+    private OffsetDateTime updatedAt;
 
     @OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
@@ -76,5 +95,10 @@ public class Ticket {
     void prePersist() {
         if (createdAt == null) createdAt = OffsetDateTime.now();
         if (fechaEntrada == null) fechaEntrada = LocalDate.now();
+    }
+
+    @PreUpdate
+    void preUpdate() {
+        updatedAt = OffsetDateTime.now();
     }
 }

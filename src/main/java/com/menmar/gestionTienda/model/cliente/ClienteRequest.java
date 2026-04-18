@@ -16,5 +16,17 @@ public record ClienteRequest(
         @NotBlank @Size(max = 20) String telefono,
 
         @Schema(description = "Email de contacto (opcional)", example = "carlos@email.com")
-        @Size(max = 255) String email
+        @Size(max = 255) String email,
+
+        @Schema(description = "Recibir notificación por email cuando el ticket esté listo", example = "false")
+        Boolean notifEmail,
+
+        @Schema(description = "Recibir notificación por WhatsApp (Callmebot) cuando el ticket esté listo", example = "false")
+        Boolean notifWhatsapp,
+
+        @Schema(description = "Recibir notificación por Telegram cuando el ticket esté listo", example = "false")
+        Boolean notifTelegram,
+
+        @Schema(description = "Chat ID de Telegram del cliente (necesario si notifTelegram es true)", example = "123456789")
+        @Size(max = 50) String telegramChatId
 ) {}

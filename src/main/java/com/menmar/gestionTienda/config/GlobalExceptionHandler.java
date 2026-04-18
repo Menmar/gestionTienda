@@ -1,5 +1,8 @@
 package com.menmar.gestionTienda.config;
 
+import com.menmar.gestionTienda.exception.ConflictoException;
+import com.menmar.gestionTienda.exception.NegocioException;
+import com.menmar.gestionTienda.exception.RecursoNoEncontradoException;
 import io.jsonwebtoken.JwtException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
@@ -15,6 +18,21 @@ import java.util.NoSuchElementException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(RecursoNoEncontradoException.class)
+    public ProblemDetail handleRecursoNoEncontrado(RecursoNoEncontradoException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+
+    @ExceptionHandler(NegocioException.class)
+    public ProblemDetail handleNegocio(NegocioException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
+    }
+
+    @ExceptionHandler(ConflictoException.class)
+    public ProblemDetail handleConflicto(ConflictoException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
+    }
 
     @ExceptionHandler(NoSuchElementException.class)
     public ProblemDetail handleNotFound(NoSuchElementException ex) {

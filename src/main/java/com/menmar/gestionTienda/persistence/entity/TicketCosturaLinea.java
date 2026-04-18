@@ -31,4 +31,8 @@ public class TicketCosturaLinea {
 
     @Column(length = 255)
     private String descripcion;
+
+    @Column(nullable = false, precision = 5, scale = 2)
+    @Builder.Default
+    private BigDecimal descuento = BigDecimal.ZERO;
 }

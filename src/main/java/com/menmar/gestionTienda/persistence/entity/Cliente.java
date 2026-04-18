@@ -26,6 +26,21 @@ public class Cliente {
     @Column(length = 255)
     private String email;
 
+    @Column(name = "notif_email", nullable = false)
+    @Builder.Default
+    private boolean notifEmail = false;
+
+    @Column(name = "notif_whatsapp", nullable = false)
+    @Builder.Default
+    private boolean notifWhatsapp = false;
+
+    @Column(name = "notif_telegram", nullable = false)
+    @Builder.Default
+    private boolean notifTelegram = false;
+
+    @Column(name = "telegram_chat_id", length = 50)
+    private String telegramChatId;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt;
 

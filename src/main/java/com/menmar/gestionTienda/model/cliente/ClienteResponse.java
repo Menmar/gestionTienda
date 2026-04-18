@@ -11,5 +11,8 @@ public record ClienteResponse(
         @Schema(description = "Apellidos") String apellidos,
         @Schema(description = "Teléfono de contacto") String telefono,
         @Schema(description = "Email de contacto (puede ser nulo)") String email,
+        @Schema(description = "Notificación por email activada") boolean notifEmail,
+        @Schema(description = "Notificación por WhatsApp activada") boolean notifWhatsapp,
+        @Schema(description = "Notificación por Telegram activada") boolean notifTelegram,
         @Schema(description = "Fecha y hora de alta") OffsetDateTime createdAt
 ) {}

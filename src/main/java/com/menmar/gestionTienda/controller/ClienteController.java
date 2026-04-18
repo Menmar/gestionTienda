@@ -37,12 +37,17 @@ public class ClienteController {
     }
 
     @GetMapping
-    @Operation(summary = "Listar clientes", description = "Devuelve todos los clientes paginados, ordenados por apellidos.")
+    @Operation(summary = "Listar o buscar clientes",
+               description = "Sin ?nombre devuelve todos paginados. Con ?nombre filtra por nombre/apellidos (parcial, sin distinción de mayúsculas).")
     @ApiResponse(responseCode = "200", description = "Listado de clientes")
     public ResponseEntity<PageResponse<ClienteResponse>> listar(
+            @Parameter(description = "Texto a buscar en nombre o apellidos (opcional)") @RequestParam(required = false) String nombre,
             @Parameter(description = "Número de página (0-based)") @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "Tamaño de página") @RequestParam(defaultValue = "20") int size) {
         var pageable = PageRequest.of(page, size, Sort.by("apellidos").ascending());
+        if (nombre != null && !nombre.isBlank()) {
+            return ResponseEntity.ok(clienteService.buscarPorNombre(nombre, pageable));
+        }
         return ResponseEntity.ok(clienteService.listar(pageable));
     }
 

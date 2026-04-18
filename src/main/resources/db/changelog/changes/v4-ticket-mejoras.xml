@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.27.xsd">
+
+    <!-- ================================================================
+         TICKET: establecimiento, descuento, IVA, auditoría
+         ================================================================ -->
+
+    <changeSet id="v4-ticket-add-establecimiento" author="menmar">
+        <addColumn tableName="ticket">
+            <column name="establecimiento_id" type="BIGINT">
+                <constraints foreignKeyName="fk_ticket_establecimiento"
+                             references="establecimiento(id)"
+                             nullable="true"/>
+            </column>
+        </addColumn>
+        <createIndex indexName="idx_ticket_establecimiento_id" tableName="ticket">
+            <column name="establecimiento_id"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="v4-ticket-add-descuento-iva" author="menmar">
+        <addColumn tableName="ticket">
+            <column name="descuento_total" type="NUMERIC(5,2)" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="aplicar_iva" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="porcentaje_iva" type="NUMERIC(5,2)" defaultValueNumeric="21">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <sql>ALTER TABLE ticket ADD CONSTRAINT chk_ticket_descuento CHECK (descuento_total BETWEEN 0 AND 100)</sql>
+        <sql>ALTER TABLE ticket ADD CONSTRAINT chk_ticket_iva CHECK (porcentaje_iva >= 0)</sql>
+    </changeSet>
+
+    <changeSet id="v4-ticket-add-updated-at" author="menmar">
+        <addColumn tableName="ticket">
+            <column name="updated_at" type="TIMESTAMP WITH TIME ZONE"/>
+        </addColumn>
+    </changeSet>
+
+    <!-- Usar secuencias de BD para la numeración de tickets (fix race condition) -->
+    <changeSet id="v4-ticket-sequences-restart" author="menmar">
+        <!-- Las secuencias ya existen desde v1; este changeSet documenta que se usan desde ahora vía NEXTVAL -->
+        <sql>SELECT 1</sql>
+    </changeSet>
+
+</databaseChangeLog>

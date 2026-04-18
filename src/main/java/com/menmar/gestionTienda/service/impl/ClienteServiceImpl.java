@@ -1,5 +1,7 @@
 package com.menmar.gestionTienda.service.impl;
 
+import com.menmar.gestionTienda.exception.ConflictoException;
+import com.menmar.gestionTienda.exception.RecursoNoEncontradoException;
 import com.menmar.gestionTienda.mapper.ClienteMapper;
 import com.menmar.gestionTienda.model.PageResponse;
 import com.menmar.gestionTienda.model.cliente.ClienteRequest;
@@ -12,8 +14,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.NoSuchElementException;
-
 @Service
 @RequiredArgsConstructor
 public class ClienteServiceImpl implements ClienteService {
@@ -25,7 +25,7 @@ public class ClienteServiceImpl implements ClienteService {
     @Transactional
     public ClienteResponse crear(ClienteRequest request) {
         if (clienteRepository.existsByTelefono(request.telefono())) {
-            throw new IllegalArgumentException("Ya existe un cliente con el teléfono: " + request.telefono());
+            throw new ConflictoException("Ya existe un cliente con el teléfono: " + request.telefono());
         }
         return clienteMapper.toResponse(clienteRepository.save(clienteMapper.toEntity(request)));
     }
@@ -34,6 +34,14 @@ public class ClienteServiceImpl implements ClienteService {
     @Transactional(readOnly = true)
     public PageResponse<ClienteResponse> listar(Pageable pageable) {
         return PageResponse.of(clienteRepository.findAll(pageable).map(clienteMapper::toResponse));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PageResponse<ClienteResponse> buscarPorNombre(String nombre, Pageable pageable) {
+        return PageResponse.of(clienteRepository
+                .findByNombreContainingIgnoreCaseOrApellidosContainingIgnoreCase(nombre, nombre, pageable)
+                .map(clienteMapper::toResponse));
     }
 
     @Override
@@ -47,7 +55,7 @@ public class ClienteServiceImpl implements ClienteService {
     public ClienteResponse buscarPorTelefono(String telefono) {
         return clienteMapper.toResponse(
                 clienteRepository.findByTelefono(telefono)
-                        .orElseThrow(() -> new NoSuchElementException("Cliente no encontrado: " + telefono)));
+                        .orElseThrow(() -> new RecursoNoEncontradoException("Cliente no encontrado: " + telefono)));
     }
 
     @Override
@@ -60,6 +68,6 @@ public class ClienteServiceImpl implements ClienteService {
 
     private Cliente findOrThrow(Long id) {
         return clienteRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("Cliente no encontrado: " + id));
+                .orElseThrow(() -> new RecursoNoEncontradoException("Cliente", id));
     }
 }

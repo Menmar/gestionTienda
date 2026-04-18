@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.27.xsd">
+
+    <!-- ================================================================
+         ESTABLECIMIENTO
+         ================================================================ -->
+
+    <changeSet id="v3-create-establecimiento" author="menmar">
+        <createTable tableName="establecimiento">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="nombre" type="VARCHAR(150)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="direccion" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="telefono" type="VARCHAR(20)"/>
+            <column name="activo" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="NOW()">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="v3-create-usuario-establecimiento" author="menmar">
+        <createTable tableName="usuario_establecimiento">
+            <column name="usuario_id" type="BIGINT">
+                <constraints nullable="false"
+                             foreignKeyName="fk_ue_usuario"
+                             references="usuario(id)"/>
+            </column>
+            <column name="establecimiento_id" type="BIGINT">
+                <constraints nullable="false"
+                             foreignKeyName="fk_ue_establecimiento"
+                             references="establecimiento(id)"/>
+            </column>
+        </createTable>
+        <addPrimaryKey tableName="usuario_establecimiento"
+                       columnNames="usuario_id, establecimiento_id"
+                       constraintName="pk_usuario_establecimiento"/>
+    </changeSet>
+
+    <!-- ================================================================
+         PRECIOS PERSONALIZADOS POR ESTABLECIMIENTO
+         ================================================================ -->
+
+    <changeSet id="v3-create-precio-establecimiento-calzado" author="menmar">
+        <createTable tableName="precio_estab_calzado">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="establecimiento_id" type="BIGINT">
+                <constraints nullable="false"
+                             foreignKeyName="fk_pec_establecimiento"
+                             references="establecimiento(id)"/>
+            </column>
+            <column name="tipo_reparacion_id" type="BIGINT">
+                <constraints nullable="false"
+                             foreignKeyName="fk_pec_tipo_reparacion"
+                             references="tipo_reparacion_calzado(id)"/>
+            </column>
+            <column name="precio" type="NUMERIC(10,2)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addUniqueConstraint tableName="precio_estab_calzado"
+                             columnNames="establecimiento_id, tipo_reparacion_id"
+                             constraintName="uq_pec_estab_tipo"/>
+    </changeSet>
+
+    <changeSet id="v3-create-precio-establecimiento-costura" author="menmar">
+        <createTable tableName="precio_estab_costura">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="establecimiento_id" type="BIGINT">
+                <constraints nullable="false"
+                             foreignKeyName="fk_peco_establecimiento"
+                             references="establecimiento(id)"/>
+            </column>
+            <column name="tipo_costura_id" type="BIGINT">
+                <constraints nullable="false"
+                             foreignKeyName="fk_peco_tipo_costura"
+                             references="tipo_costura(id)"/>
+            </column>
+            <column name="precio" type="NUMERIC(10,2)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addUniqueConstraint tableName="precio_estab_costura"
+                             columnNames="establecimiento_id, tipo_costura_id"
+                             constraintName="uq_peco_estab_tipo"/>
+    </changeSet>
+
+    <changeSet id="v3-create-precio-establecimiento-llave" author="menmar">
+        <createTable tableName="precio_estab_llave">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="establecimiento_id" type="BIGINT">
+                <constraints nullable="false"
+                             foreignKeyName="fk_pel_establecimiento"
+                             references="establecimiento(id)"/>
+            </column>
+            <column name="tipo_llave_id" type="BIGINT">
+                <constraints nullable="false"
+                             foreignKeyName="fk_pel_tipo_llave"
+                             references="tipo_llave(id)"/>
+            </column>
+            <column name="precio" type="NUMERIC(10,2)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addUniqueConstraint tableName="precio_estab_llave"
+                             columnNames="establecimiento_id, tipo_llave_id"
+                             constraintName="uq_pel_estab_tipo"/>
+    </changeSet>
+
+</databaseChangeLog>

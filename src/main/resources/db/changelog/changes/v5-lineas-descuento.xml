@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.27.xsd">
+
+    <!-- ================================================================
+         DESCUENTO POR LÍNEA EN LOS TRES TIPOS DE TICKET
+         ================================================================ -->
+
+    <changeSet id="v5-calzado-linea-descuento" author="menmar">
+        <addColumn tableName="ticket_calzado_linea">
+            <column name="descuento" type="NUMERIC(5,2)" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <sql>ALTER TABLE ticket_calzado_linea ADD CONSTRAINT chk_cal_linea_descuento CHECK (descuento BETWEEN 0 AND 100)</sql>
+    </changeSet>
+
+    <changeSet id="v5-costura-linea-descuento" author="menmar">
+        <addColumn tableName="ticket_costura_linea">
+            <column name="descuento" type="NUMERIC(5,2)" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <sql>ALTER TABLE ticket_costura_linea ADD CONSTRAINT chk_cos_linea_descuento CHECK (descuento BETWEEN 0 AND 100)</sql>
+    </changeSet>
+
+    <changeSet id="v5-llave-linea-descuento" author="menmar">
+        <addColumn tableName="ticket_llave_linea">
+            <column name="descuento" type="NUMERIC(5,2)" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <sql>ALTER TABLE ticket_llave_linea ADD CONSTRAINT chk_lla_linea_descuento CHECK (descuento BETWEEN 0 AND 100)</sql>
+    </changeSet>
+
+</databaseChangeLog>

@@ -101,6 +101,14 @@ Desktop.ini
 .scannerwork/
 
 # ============================================================
+# Frontend
+# ============================================================
+frontend/node_modules/
+frontend/dist/
+frontend/.node/
+
+# ============================================================
 # Docker
 # ============================================================
 docker-compose.override.yml
+/.claude/worktrees/stupefied-banzai-f80e7f/

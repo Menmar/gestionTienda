@@ -14,6 +14,7 @@ Sistema de gestión para una tienda de reparación de calzado y duplicado de lla
 | Mapeos | MapStruct 1.6.3 |
 | Boilerplate | Lombok |
 | Generación PDF | OpenPDF 1.3.43 |
+| Email | Spring Mail (JavaMailSender) |
 | API docs | SpringDoc OpenAPI 3.0.3 (Swagger UI) |
 | Tests | JUnit 5 + Testcontainers (PostgreSQL) |
 
@@ -27,6 +28,7 @@ Sistema de gestión para una tienda de reparación de calzado y duplicado de lla
 - **Catálogo** — familias y tipos de reparación, costura y llave (escritura solo ADMIN)
 - **Clientes** — CRUD con búsqueda por teléfono y listado paginado
 - **Usuarios** — empleados y administradores (solo ADMIN)
+- **Notificaciones** — envío de email/WhatsApp/Telegram al cliente cuando el ticket pasa a LISTO; credenciales configurables por establecimiento en BD (con fallback a variables de entorno globales)
 
 ## Requisitos previos
 
@@ -45,17 +47,123 @@ Variables de entorno necesarias en producción:
 | `DB_PASSWORD` | Contraseña de PostgreSQL | — |
 | `JWT_SECRET` | Clave HMAC ≥ 32 caracteres | — |
 | `FOTOS_DIR` | Ruta absoluta para almacenar las fotos | `./uploads/fotos` |
+| `MAIL_HOST` | Servidor SMTP (ej. `smtp.gmail.com`) | — |
+| `MAIL_PORT` | Puerto SMTP | `587` |
+| `MAIL_USERNAME` | Cuenta de correo remitente | — |
+| `MAIL_PASSWORD` | Contraseña / app-password del correo | — |
+| `APP_NOTIFICACIONES_EMAIL_REMITENTE` | From global de email (override por establecimiento en BD) | — |
+| `APP_NOTIFICACIONES_CALLMEBOT_API_KEY` | API key global de CallMeBot/WhatsApp (override por establecimiento en BD) | — |
+| `APP_NOTIFICACIONES_TELEGRAM_BOT_TOKEN` | Token global del bot de Telegram (override por establecimiento en BD) | — |
 
 Para desarrollo local usa el perfil `local` (`application-local.yaml`).
 
 ## Ejecución local
 
+### Opción A — desarrollo con hot-reload (back y front por separado)
+
+Arranca el backend y el frontend en terminales separadas. El proxy de Vite redirige
+las llamadas `/api/**` a `localhost:8080`, por lo que no hay que tocar CORS.
+
 ```bash
+# Terminal 1 — backend (perfil local, recarga con spring-devtools si está en classpath)
 ./mvnw spring-boot:run -Plocal
+
+# Terminal 2 — frontend (Vite dev server con HMR)
+cd frontend
+npm install        # solo la primera vez
+npm run dev
 ```
 
-- API: `http://localhost:8080`
-- Swagger UI: `http://localhost:8080/swagger-ui.html`
+| Servicio | URL |
+|----------|-----|
+| Frontend (Vite) | `http://localhost:5173` |
+| API / Swagger UI | `http://localhost:8080` / `http://localhost:8080/swagger-ui.html` |
+
+### Opción B — JAR integrado (back sirve el front compilado)
+
+Maven compila el frontend y lo copia a `src/main/resources/static` antes de empaquetar el JAR.
+Útil para probar el bundle de producción en local.
+
+```bash
+./mvnw spring-boot:run -Plocal   # frontend-maven-plugin compila el front automáticamente
+```
+
+Accede a todo desde `http://localhost:8080`.
+
+---
+
+## Despliegue en producción
+
+### 1. Variables de entorno obligatorias
+
+Exporta las variables antes de arrancar (o usa un fichero `.env` con tu gestor de procesos):
+
+```bash
+export DB_USERNAME=…
+export DB_PASSWORD=…
+export JWT_SECRET=…                          # clave HMAC ≥ 32 caracteres
+export ADMIN_EMAIL=…
+export ADMIN_PASSWORD=…
+
+# Correo (SMTP)
+export MAIL_HOST=smtp.gmail.com
+export MAIL_PORT=587
+export MAIL_USERNAME=…
+export MAIL_PASSWORD=…                       # app-password de Google u otro proveedor
+
+# Notificaciones globales (opcional si se configura por establecimiento en BD)
+export APP_NOTIFICACIONES_EMAIL_REMITENTE=…
+export APP_NOTIFICACIONES_CALLMEBOT_API_KEY=…
+export APP_NOTIFICACIONES_TELEGRAM_BOT_TOKEN=…
+
+# Almacenamiento de fotos
+export FOTOS_DIR=/var/gestiontienda/fotos    # ruta absoluta con permisos de escritura
+```
+
+### 2. Generar el JAR de producción
+
+El plugin `frontend-maven-plugin` descarga Node, instala dependencias y ejecuta `npm run build`
+automáticamente durante `mvn package`. No es necesario construir el frontend por separado.
+
+```bash
+./mvnw package -Pprod -DskipTests
+```
+
+El artefacto resultante es `target/gestionTienda-0.0.1-SNAPSHOT.jar` (~50 MB, self-contained).
+
+### 3. Arrancar el servidor
+
+```bash
+java -jar target/gestionTienda-0.0.1-SNAPSHOT.jar
+```
+
+Spring Boot sirve el frontend compilado en `/` y la API en `/api/**`. No se necesita Nginx
+ni servidor web adicional salvo que quieras terminación TLS o reverse proxy.
+
+| Ruta | Contenido |
+|------|-----------|
+| `/` | Aplicación Vue |
+| `/api/**` | REST API |
+| `/swagger-ui.html` | Documentación OpenAPI |
+
+### 4. Reverse proxy con Nginx (opcional, para TLS)
+
+```nginx
+server {
+    listen 443 ssl;
+    server_name tudominio.com;
+
+    ssl_certificate     /etc/ssl/certs/tudominio.crt;
+    ssl_certificate_key /etc/ssl/private/tudominio.key;
+
+    location / {
+        proxy_pass         http://127.0.0.1:8080;
+        proxy_set_header   Host $host;
+        proxy_set_header   X-Real-IP $remote_addr;
+        proxy_set_header   X-Forwarded-Proto https;
+    }
+}
+```
 
 ## Tests de integración
 
@@ -153,14 +261,16 @@ src/main/java/com/menmar/gestionTienda/
 │   ├── entity/      # Entidades JPA + enums de dominio
 │   └── repository/  # Spring Data repositories
 ├── security/        # JwtService, JwtAuthenticationFilter, UserDetailsServiceImpl
-└── service/         # Interfaces de servicio + implementaciones (impl/)
+├── service/         # Interfaces de servicio + implementaciones (impl/)
+│   └── notificacion/ # Estrategias de notificación por canal (EMAIL, …)
+└── (raíz)
 ```
 
 ## Posibles mejoras futuras
 
 ### Funcionalidad
 - **Historial de estados** — tabla `ticket_estado_log` con marca de tiempo y empleado en cada transición
-- **Notificaciones** — email o SMS al cliente cuando el ticket pasa a LISTO
+- ~~**Notificaciones** — email o SMS al cliente cuando el ticket pasa a LISTO~~ *(implementado)*
 - **Presupuestos** — crear un presupuesto previo vinculable a un ticket
 - **Estadísticas** — endpoint de resumen (tickets por estado, ingresos por período, tipos más frecuentes)
 - **Búsqueda global** — buscar tickets por nombre de cliente, teléfono o código desde un único endpoint

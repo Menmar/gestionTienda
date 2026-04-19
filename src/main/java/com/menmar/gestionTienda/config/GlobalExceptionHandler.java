@@ -23,9 +23,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AppException.class)
     public ProblemDetail handleAppException(AppException ex) {
         var status = switch (ex) {
-            case RecursoNoEncontradoException ignored -> HttpStatus.NOT_FOUND;
-            case NegocioException             ignored -> HttpStatus.UNPROCESSABLE_ENTITY;
-            case ConflictoException           ignored -> HttpStatus.CONFLICT;
+            case RecursoNoEncontradoException _ -> HttpStatus.NOT_FOUND;
+            case NegocioException             _ -> HttpStatus.UNPROCESSABLE_ENTITY;
+            case ConflictoException           _ -> HttpStatus.CONFLICT;
+            default -> throw new IllegalStateException("AppException no manejada: " + ex.getClass());
         };
         return ProblemDetail.forStatusAndDetail(status, ex.getMessage());
     }
@@ -67,7 +68,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ProblemDetail handleMaxUploadSize(MaxUploadSizeExceededException ex) {
-        return ProblemDetail.forStatusAndDetail(HttpStatus.PAYLOAD_TOO_LARGE,
+        return ProblemDetail.forStatusAndDetail(HttpStatus.CONTENT_TOO_LARGE,
                 "El fichero supera el tamaño máximo permitido");
     }
 

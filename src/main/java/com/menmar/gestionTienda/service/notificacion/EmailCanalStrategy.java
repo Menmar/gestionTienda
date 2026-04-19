@@ -1,5 +1,6 @@
 package com.menmar.gestionTienda.service.notificacion;
 
+import com.menmar.gestionTienda.config.AppProperties;
 import com.menmar.gestionTienda.persistence.entity.CanalNotificacion;
 import com.menmar.gestionTienda.persistence.entity.Ticket;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Component;
 public class EmailCanalStrategy implements CanalNotificacionStrategy {
 
     private final JavaMailSender mailSender;
+    private final AppProperties appProperties;
 
     @Override
     public CanalNotificacion canal() {
@@ -28,7 +30,9 @@ public class EmailCanalStrategy implements CanalNotificacionStrategy {
             return;
         }
         try {
+            var remitente = resolverRemitente(ticket);
             var msg = new SimpleMailMessage();
+            if (remitente != null) msg.setFrom(remitente);
             msg.setTo(email);
             msg.setSubject("Su pedido %s está listo".formatted(ticket.getNumeroTicket()));
             msg.setText(construirMensaje(ticket));
@@ -37,6 +41,15 @@ public class EmailCanalStrategy implements CanalNotificacionStrategy {
         } catch (Exception e) {
             log.error("Error enviando email a {} para ticket {}: {}", email, ticket.getNumeroTicket(), e.getMessage());
         }
+    }
+
+    private String resolverRemitente(Ticket ticket) {
+        var estab = ticket.getEstablecimiento();
+        if (estab != null && estab.getEmailRemitente() != null && !estab.getEmailRemitente().isBlank()) {
+            return estab.getEmailRemitente();
+        }
+        var cfg = appProperties.notificaciones();
+        return cfg != null ? cfg.emailRemitente() : null;
     }
 
     private String construirMensaje(Ticket ticket) {

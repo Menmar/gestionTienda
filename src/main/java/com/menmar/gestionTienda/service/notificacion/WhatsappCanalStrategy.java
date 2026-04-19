@@ -24,24 +24,34 @@ public class WhatsappCanalStrategy implements CanalNotificacionStrategy {
 
     @Override
     public void enviar(Ticket ticket) {
-        var cfg = appProperties.notificaciones();
-        if (cfg == null || cfg.callmebotApiKey() == null || cfg.callmebotApiKey().isBlank()) {
+        var apiKey = resolverApiKey(ticket);
+        if (apiKey == null || apiKey.isBlank()) {
             log.warn("Callmebot no configurado, omitiendo notificación WHATSAPP para ticket {}", ticket.getNumeroTicket());
             return;
         }
+        var cfg = appProperties.notificaciones();
         var telefono = ticket.getCliente().getTelefono();
         try {
             var url = UriComponentsBuilder
-                    .fromHttpUrl(cfg.callmebotBaseUrl())
+                    .fromUriString(cfg.callmebotBaseUrl())
                     .queryParam("phone",  telefono)
                     .queryParam("text",   construirMensaje(ticket))
-                    .queryParam("apikey", cfg.callmebotApiKey())
+                    .queryParam("apikey", apiKey)
                     .toUriString();
             restTemplate.getForObject(url, String.class);
             log.info("WhatsApp enviado a {} para ticket {}", telefono, ticket.getNumeroTicket());
         } catch (Exception e) {
             log.error("Error enviando WhatsApp a {} para ticket {}: {}", telefono, ticket.getNumeroTicket(), e.getMessage());
         }
+    }
+
+    private String resolverApiKey(Ticket ticket) {
+        var estab = ticket.getEstablecimiento();
+        if (estab != null && estab.getCallmebotApiKey() != null && !estab.getCallmebotApiKey().isBlank()) {
+            return estab.getCallmebotApiKey();
+        }
+        var cfg = appProperties.notificaciones();
+        return cfg != null ? cfg.callmebotApiKey() : null;
     }
 
     private String construirMensaje(Ticket ticket) {

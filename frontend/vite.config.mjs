@@ -6,7 +6,6 @@ import vue from '@vitejs/plugin-vue';
 import Components from 'unplugin-vue-components/vite';
 import { defineConfig } from 'vite';
 
-// https://vitejs.dev/config/
 export default defineConfig({
     optimizeDeps: {
         noDiscovery: true
@@ -29,5 +28,17 @@ export default defineConfig({
                 api: 'modern-compiler'
             }
         }
+    },
+    server: {
+        port: 5173,
+        proxy: {
+            '/api': {
+                target: 'http://localhost:8080',
+                changeOrigin: true
+            }
+        }
+    },
+    build: {
+        outDir: 'dist'
     }
 });

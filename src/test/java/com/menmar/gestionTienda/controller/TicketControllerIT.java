@@ -27,7 +27,7 @@ class TicketControllerIT extends AbstractIT {
         var clienteBody = mockMvc.perform(post("/clientes")
                         .header("Authorization", bearer(tokenEmpleado))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(json(new ClienteRequest("Test", "Cliente", "699000001", null))))
+                        .content(json(new ClienteRequest("Test", "Cliente", "699000001", null, null, null))))
                 .andReturn().getResponse().getContentAsString();
         clienteId = objectMapper.readTree(clienteBody).get("id").asLong();
 
@@ -39,9 +39,9 @@ class TicketControllerIT extends AbstractIT {
 
     @Test
     void crearTicketLlave_devuelve201() throws Exception {
-        var linea = new LineaLlaveRequest(tipoLlaveId, (short) 2);
-        var request = new TicketRequest(TipoTicket.LLAVE, clienteId, null, "Sin observaciones",
-                null, null, List.of(linea));
+        var linea = new LineaLlaveRequest(tipoLlaveId, (short) 2, null, null);
+        var request = new TicketRequest(TipoTicket.LLAVE, clienteId, null, null, "Sin observaciones",
+                null, null, null, null, null, List.of(linea));
 
         mockMvc.perform(post("/tickets")
                         .header("Authorization", bearer(tokenEmpleado))
@@ -65,9 +65,9 @@ class TicketControllerIT extends AbstractIT {
 
     @Test
     void listarTicketsFiltradosPorTipo_devuelveSoloEseTipo() throws Exception {
-        var linea = new LineaLlaveRequest(tipoLlaveId, (short) 1);
-        var request = new TicketRequest(TipoTicket.LLAVE, clienteId, null, null,
-                null, null, List.of(linea));
+        var linea = new LineaLlaveRequest(tipoLlaveId, (short) 1, null, null);
+        var request = new TicketRequest(TipoTicket.LLAVE, clienteId, null, null, null,
+                null, null, null, null, null, List.of(linea));
         mockMvc.perform(post("/tickets")
                         .header("Authorization", bearer(tokenEmpleado))
                         .contentType(MediaType.APPLICATION_JSON)
@@ -82,9 +82,9 @@ class TicketControllerIT extends AbstractIT {
 
     @Test
     void cambiarEstado_aListoDevuelveEstadoActualizado() throws Exception {
-        var linea = new LineaLlaveRequest(tipoLlaveId, (short) 1);
-        var request = new TicketRequest(TipoTicket.LLAVE, clienteId, null, null,
-                null, null, List.of(linea));
+        var linea = new LineaLlaveRequest(tipoLlaveId, (short) 1, null, null);
+        var request = new TicketRequest(TipoTicket.LLAVE, clienteId, null, null, null,
+                null, null, null, null, null, List.of(linea));
         var ticketBody = mockMvc.perform(post("/tickets")
                         .header("Authorization", bearer(tokenEmpleado))
                         .contentType(MediaType.APPLICATION_JSON)

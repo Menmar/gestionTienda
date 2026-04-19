@@ -12,5 +12,6 @@
     <include file="db/changelog/changes/v5-lineas-descuento.xml"/>
     <include file="db/changelog/changes/v6-cliente-notificaciones.xml"/>
     <include file="db/changelog/changes/v7-cliente-canales-notificacion.xml"/>
+    <include file="db/changelog/changes/v8-establecimiento-notificaciones.xml"/>
 
 </databaseChangeLog>

@@ -24,8 +24,8 @@ public class TelegramCanalStrategy implements CanalNotificacionStrategy {
 
     @Override
     public void enviar(Ticket ticket) {
-        var cfg = appProperties.notificaciones();
-        if (cfg == null || cfg.telegramBotToken() == null || cfg.telegramBotToken().isBlank()) {
+        var botToken = resolverBotToken(ticket);
+        if (botToken == null || botToken.isBlank()) {
             log.warn("Telegram bot no configurado, omitiendo notificación para ticket {}", ticket.getNumeroTicket());
             return;
         }
@@ -34,9 +34,10 @@ public class TelegramCanalStrategy implements CanalNotificacionStrategy {
             log.warn("Cliente {} sin telegram_chat_id, omitiendo notificación TELEGRAM", ticket.getCliente().getId());
             return;
         }
+        var cfg = appProperties.notificaciones();
         try {
             var url = UriComponentsBuilder
-                    .fromHttpUrl(cfg.telegramBaseUrl() + "/bot" + cfg.telegramBotToken() + "/sendMessage")
+                    .fromUriString(cfg.telegramBaseUrl() + "/bot" + botToken + "/sendMessage")
                     .queryParam("chat_id", chatId)
                     .queryParam("text",    construirMensaje(ticket))
                     .toUriString();
@@ -45,6 +46,15 @@ public class TelegramCanalStrategy implements CanalNotificacionStrategy {
         } catch (Exception e) {
             log.error("Error enviando Telegram a chat {} para ticket {}: {}", chatId, ticket.getNumeroTicket(), e.getMessage());
         }
+    }
+
+    private String resolverBotToken(Ticket ticket) {
+        var estab = ticket.getEstablecimiento();
+        if (estab != null && estab.getTelegramBotToken() != null && !estab.getTelegramBotToken().isBlank()) {
+            return estab.getTelegramBotToken();
+        }
+        var cfg = appProperties.notificaciones();
+        return cfg != null ? cfg.telegramBotToken() : null;
     }
 
     private String construirMensaje(Ticket ticket) {

@@ -21,7 +21,7 @@ class PdfControllerIT extends AbstractIT {
         var clienteBody = mockMvc.perform(post("/clientes")
                         .header("Authorization", bearer(tokenEmpleado))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(json(new ClienteRequest("PDF", "Test", "699000003", null))))
+                        .content(json(new ClienteRequest("PDF", "Test", "699000003", null, null, null))))
                 .andReturn().getResponse().getContentAsString();
         var clienteId = objectMapper.readTree(clienteBody).get("id").asLong();
 
@@ -33,9 +33,9 @@ class PdfControllerIT extends AbstractIT {
         var ticketBody = mockMvc.perform(post("/tickets")
                         .header("Authorization", bearer(tokenEmpleado))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(json(new TicketRequest(TipoTicket.LLAVE, clienteId, null,
-                                "Urgente", null, null,
-                                List.of(new LineaLlaveRequest(tipoLlaveId, (short) 1))))))
+                        .content(json(new TicketRequest(TipoTicket.LLAVE, clienteId, null, null,
+                                "Urgente", null, null, null, null, null,
+                                List.of(new LineaLlaveRequest(tipoLlaveId, (short) 1, null, null))))))
                 .andReturn().getResponse().getContentAsString();
         var ticketId = objectMapper.readTree(ticketBody).get("id").asLong();
 

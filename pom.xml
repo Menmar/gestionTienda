@@ -70,7 +70,7 @@
             <goals><goal>npm</goal></goals>
             <phase>generate-resources</phase>
             <configuration>
-              <arguments>install</arguments>
+              <arguments>install --legacy-peer-deps</arguments>
             </configuration>
           </execution>
           <execution>
@@ -212,6 +212,12 @@
       <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
       <groupId>org.springdoc</groupId>
       <version>${springdoc.version}</version>
+    </dependency>
+
+    <!-- Email -->
+    <dependency>
+      <artifactId>spring-boot-starter-mail</artifactId>
+      <groupId>org.springframework.boot</groupId>
     </dependency>
 
     <!-- PDF generation -->

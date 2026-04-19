@@ -25,6 +25,15 @@ public class Establecimiento {
     @Column(length = 20)
     private String telefono;
 
+    @Column(name = "email_remitente", length = 150)
+    private String emailRemitente;
+
+    @Column(name = "callmebot_api_key", length = 100)
+    private String callmebotApiKey;
+
+    @Column(name = "telegram_bot_token", length = 100)
+    private String telegramBotToken;
+
     @Column(nullable = false)
     @Builder.Default
     private boolean activo = true;

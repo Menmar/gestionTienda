@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.27.xsd">
+
+    <!-- ================================================================
+         ESTABLECIMIENTO: credenciales de notificación por tienda
+         ================================================================ -->
+
+    <changeSet id="v8-establecimiento-notificaciones" author="menmar">
+        <addColumn tableName="establecimiento">
+            <column name="email_remitente" type="VARCHAR(150)"
+                    remarks="Dirección From del email de notificación; usa el global si es null"/>
+            <column name="callmebot_api_key" type="VARCHAR(100)"
+                    remarks="API key de CallMeBot para WhatsApp; usa el global si es null"/>
+            <column name="telegram_bot_token" type="VARCHAR(100)"
+                    remarks="Token del bot de Telegram; usa el global si es null"/>
+        </addColumn>
+    </changeSet>
+
+</databaseChangeLog>

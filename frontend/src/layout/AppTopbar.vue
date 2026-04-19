@@ -1,8 +1,17 @@
 <script setup>
 import { useLayout } from '@/layout/composables/layout';
+import { useAuthStore } from '@/stores/auth';
+import { useRouter } from 'vue-router';
 import AppConfigurator from './AppConfigurator.vue';
 
 const { toggleMenu, toggleDarkMode, isDarkTheme } = useLayout();
+const auth = useAuthStore();
+const router = useRouter();
+
+function cerrarSesion() {
+    auth.logout();
+    router.push({ name: 'login' });
+}
 </script>
 
 <template>
@@ -60,17 +69,10 @@ const { toggleMenu, toggleDarkMode, isDarkTheme } = useLayout();
 
             <div class="layout-topbar-menu hidden lg:block">
                 <div class="layout-topbar-menu-content">
-                    <button type="button" class="layout-topbar-action">
-                        <i class="pi pi-calendar"></i>
-                        <span>Calendar</span>
-                    </button>
-                    <button type="button" class="layout-topbar-action">
-                        <i class="pi pi-inbox"></i>
-                        <span>Messages</span>
-                    </button>
-                    <button type="button" class="layout-topbar-action">
-                        <i class="pi pi-user"></i>
-                        <span>Profile</span>
+                    <span class="font-semibold text-sm mr-1">{{ auth.nombreCompleto }}</span>
+                    <button type="button" class="layout-topbar-action" @click="cerrarSesion" title="Cerrar sesión">
+                        <i class="pi pi-sign-out"></i>
+                        <span>Salir</span>
                     </button>
                 </div>
             </div>

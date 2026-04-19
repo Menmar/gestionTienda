@@ -25,7 +25,7 @@ class FotoControllerIT extends AbstractIT {
         var clienteBody = mockMvc.perform(post("/clientes")
                         .header("Authorization", bearer(tokenEmpleado))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(json(new ClienteRequest("Foto", "Test", "699000002", null))))
+                        .content(json(new ClienteRequest("Foto", "Test", "699000002", null, null, null))))
                 .andReturn().getResponse().getContentAsString();
         var clienteId = objectMapper.readTree(clienteBody).get("id").asLong();
 
@@ -37,8 +37,8 @@ class FotoControllerIT extends AbstractIT {
         var ticketBody = mockMvc.perform(post("/tickets")
                         .header("Authorization", bearer(tokenEmpleado))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(json(new TicketRequest(TipoTicket.LLAVE, clienteId, null, null,
-                                null, null, List.of(new LineaLlaveRequest(tipoLlaveId, (short) 1))))))
+                        .content(json(new TicketRequest(TipoTicket.LLAVE, clienteId, null, null, null,
+                                null, null, null, null, null, List.of(new LineaLlaveRequest(tipoLlaveId, (short) 1, null, null))))))
                 .andReturn().getResponse().getContentAsString();
         ticketId = objectMapper.readTree(ticketBody).get("id").asLong();
     }

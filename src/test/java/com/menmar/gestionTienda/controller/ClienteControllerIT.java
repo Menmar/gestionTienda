@@ -13,7 +13,7 @@ class ClienteControllerIT extends AbstractIT {
 
     @Test
     void crearCliente_devuelve201() throws Exception {
-        var request = new ClienteRequest("Ana", "García López", "600111222", "ana@email.com");
+        var request = new ClienteRequest("Ana", "García López", "600111222", "ana@email.com", null, null);
 
         mockMvc.perform(post("/clientes")
                         .header("Authorization", bearer(tokenEmpleado))
@@ -26,7 +26,7 @@ class ClienteControllerIT extends AbstractIT {
 
     @Test
     void crearCliente_telefonoDuplicado_devuelve400() throws Exception {
-        var request = new ClienteRequest("Pedro", "Ruiz", "600222333", null);
+        var request = new ClienteRequest("Pedro", "Ruiz", "600222333", null, null, null);
 
         mockMvc.perform(post("/clientes")
                         .header("Authorization", bearer(tokenEmpleado))
@@ -54,7 +54,7 @@ class ClienteControllerIT extends AbstractIT {
 
     @Test
     void buscarPorTelefono_existente_devuelveCliente() throws Exception {
-        var request = new ClienteRequest("Luis", "Martínez", "611999888", null);
+        var request = new ClienteRequest("Luis", "Martínez", "611999888", null, null, null);
         mockMvc.perform(post("/clientes")
                         .header("Authorization", bearer(tokenEmpleado))
                         .contentType(MediaType.APPLICATION_JSON)
@@ -76,7 +76,7 @@ class ClienteControllerIT extends AbstractIT {
 
     @Test
     void actualizarCliente_devuelve200() throws Exception {
-        var crear = new ClienteRequest("Carmen", "Vega", "622333444", null);
+        var crear = new ClienteRequest("Carmen", "Vega", "622333444", null, null, null);
         var idBody = mockMvc.perform(post("/clientes")
                         .header("Authorization", bearer(tokenEmpleado))
                         .contentType(MediaType.APPLICATION_JSON)
@@ -85,7 +85,7 @@ class ClienteControllerIT extends AbstractIT {
 
         var id = objectMapper.readTree(idBody).get("id").asLong();
 
-        var actualizar = new ClienteRequest("Carmen", "Vega Sánchez", "622333444", "carmen@email.com");
+        var actualizar = new ClienteRequest("Carmen", "Vega Sánchez", "622333444", "carmen@email.com", null, null);
         mockMvc.perform(put("/clientes/" + id)
                         .header("Authorization", bearer(tokenEmpleado))
                         .contentType(MediaType.APPLICATION_JSON)
